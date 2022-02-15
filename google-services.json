@@ -1,0 +1,39 @@
+{
+    "project_info": {
+      "project_number": "360248222144",
+      "project_id": "chacha-33cb4",
+      "storage_bucket": "chacha-33cb4.appspot.com"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:360248222144:android:5728a2aff6ccf638c5a825",
+          "android_client_info": {
+            "package_name": "com.mantle.ChaCha"
+          }
+        },
+        "oauth_client": [
+          {
+            "client_id": "360248222144-lo5v4jsd44l2uehkj8mgl4ngj7su1j0g.apps.googleusercontent.com",
+            "client_type": 3
+          }
+        ],
+        "api_key": [
+          {
+            "current_key": "AIzaSyCZ8CV3i5kzhjLAD63q9SlBcFOp-iYBaqA"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": [
+              {
+                "client_id": "360248222144-lo5v4jsd44l2uehkj8mgl4ngj7su1j0g.apps.googleusercontent.com",
+                "client_type": 3
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }

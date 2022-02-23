@@ -1,20 +1,34 @@
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
-import React, { useState, useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { Platform, Text } from 'react-native';
 import { MainLookup } from './src/Lookup'
 import { useFonts } from 'expo-font'
 import AppLoading from 'expo-app-loading';
-import { NavigationContainer } from '@react-navigation/native'
-import { AppProvider } from './AppContext';
+import { NavigationContainer, useNavigation } from '@react-navigation/native'
+import { AppProvider, AppContext } from './AppContext';
 import MainScreen from './src/Navigations'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import firebase from "firebase";
+import * as Linking from 'expo-linking'
 
+const prefix = Linking.createURL('/', 'https://african-chacha.herokuapp.com')
 
+const firebaseConfig = {
+  apiKey: "AIzaSyAerzaWKI8hibbhcbM-cGAsDlscudXELCs",
+  authDomain: "pyd-storage.firebaseapp.com",
+  projectId: "pyd-storage",
+  storageBucket: "pyd-storage.appspot.com",
+  messagingSenderId: "1098978740625",
+  appId: "1:1098978740625:web:feda32b40bfa45c4a63230"
+};
+
+if (firebase.apps.length === 0) {
+  firebase.initializeApp(firebaseConfig);
+}
 function MainApp() {
   return (
-    <NavigationContainer>
-      <MainScreen />
-    </NavigationContainer>
+    <MainScreen />
   )
 }
 
@@ -23,22 +37,28 @@ function NotificationHandlerApp() {
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
+  const ctx = useContext(AppContext);
+  const nav = useNavigation()
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => {
       setExpoPushToken(token)
-      const cb = (r, c) => {
-        console.log(r, c)
+      if (ctx.token) {
+        const cb = (r, c) => {
+          if (c === 500) {
+            AsyncStorage.removeItem("session_token")
+          }
+        }
+        MainLookup(cb, { method: 'GET', endpoint: `/api/notification/add/token=${token}` })
       }
-      MainLookup(cb, { method: 'POST', endpoint: `/notification/add/token=${token}` })
-    });
+    }, [expoPushToken, ctx.token]);
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       setNotification(notification);
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
+      // console.log(response);
     });
 
     return () => {
@@ -48,7 +68,9 @@ function NotificationHandlerApp() {
   }, []);
 
   return (
-    <MainApp />
+    <>
+      <MainApp />
+    </>
   );
 }
 
@@ -57,6 +79,9 @@ function FontsHandlerApp() {
   const [loaded] = useFonts({
     'Poppins-Bold': {
       uri: require('./assets/fonts/Poppins/Poppins-Bold.ttf'),
+    },
+    'Poppins-Black': {
+      uri: require('./assets/fonts/Poppins/Poppins-Black.ttf'),
     },
     'Bold': {
       uri: require('./assets/fonts/Poppins/Poppins-Bold.ttf'),
@@ -72,6 +97,12 @@ function FontsHandlerApp() {
     },
     'Poppins-Regular': {
       uri: require('./assets/fonts/Poppins/Poppins-Regular.ttf'),
+    },
+    'Poppins-MediumItalic': {
+      uri: require('./assets/fonts/Poppins/Poppins-MediumItalic.ttf'),
+    },
+    'Poppins-Medium': {
+      uri: require('./assets/fonts/Poppins/Poppins-Medium.ttf'),
     },
     'Cursive': {
       uri: require('./assets/fonts/Rochester-Regular.ttf'),
@@ -99,12 +130,60 @@ function FontsHandlerApp() {
     )
   }
 }
+
+function LinkingHandlerApp() {
+  
+}
 export default function App() {
+  const [data, setData] = useState(null);
+
+  const linking = {
+    prefixes: [prefix],
+    config: {
+      screens: {
+        Home: 'Home',
+        Landing: 'Landing',
+        Feed: 'Feed',
+        Test: 'test',
+        TestAgain: 'test-two',
+      }
+    }
+  }
+
+  function handler(e) {
+    let data = Linking.parse(e.url);
+    setData(data);
+  }
+
+  useEffect(() => {
+
+    async function getInitialUrl() {
+      const initialUrl = await Linking.getInitialURL();
+      if (initialUrl) setData(Linking.parse(initialUrl))
+    }
+
+    Linking.addEventListener('url', handler)
+    if (!data) {
+      getInitialUrl();
+    }
+
+    return () => {
+      Linking.removeEventListener("url")
+    }
+
+  }, [])
 
   return (
-    <AppProvider>
-      <FontsHandlerApp />
-    </AppProvider>
+    <NavigationContainer linking={linking}>
+      <AppProvider>
+        {/* <Text style={{
+          padding: 20,
+          color: 'red',
+          backgroundColor: 'green'
+        }}>{data ? JSON.stringify(data) : 'App not opened from url'}</Text> */}
+        <FontsHandlerApp />
+      </AppProvider>
+    </NavigationContainer>
   )
 }
 

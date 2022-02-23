@@ -104,7 +104,7 @@ export default function ActionBtns(props) {
                     : null
                 }
             </View>
-            <View style={{ width: "70%", flexDirection: 'row', justifyContent: 'space-around' }}>
+            <View style={{ width: "30%", flexDirection: 'row', justifyContent: 'space-around' }}>
                 <TouchableOpacity onPress={Like}>
                     {LikeBtn}
                 </TouchableOpacity>
@@ -113,13 +113,13 @@ export default function ActionBtns(props) {
                     {DisLikeBtn}
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={Comment}>
+                {/* <TouchableOpacity onPress={Comment}>
                     <EvilIcons name='comment' color="#2c3e50" size={ICONSIZE} />
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={Reply}>
                     <EvilIcons name='share-google' color="#2c3e50" size={ICONSIZE} />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
         </>
     );
@@ -179,18 +179,20 @@ export function BodyRender(props) {
     const [result, setResult] = useState(null);
 
     const OpenUrl = async (url) => {
-        Linking.openURL(url)
+        nav.push("View Page", { url })
+        // Linking.openURL(url)
     }
 
     return (
         <View style={{ width: width, alignSelf: 'center' }}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: '80%' }}>
-                <Text style={{color: 'red'}}>{result && JSON.stringify(result)}</Text>
+                <Text style={{ color: 'red' }}>{result && JSON.stringify(result)}</Text>
                 {body.map((item, index) => {
                     const val = item[0] === "#"
                     const ping = item[0] === '@'
-                    const link = item.includes('http') || item.includes('https')
-                    if (val || ping || link === true) {
+                    const link = item.toLowerCase().includes('http') || item.toLowerCase().includes('https')
+                    console.log(link)
+                    if (val || ping || link) {
                         if (val) {
                             return (
                                 <TouchableOpacity key={index} onPress={() => (nav.navigate('View Hashtag', { hashtag: item }))} style={{ paddingRight: 1 }}>

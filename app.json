@@ -1,20 +1,16 @@
 {
   "expo": {
     "name": "Chacha",
-    "scheme": "african-chacha",
+    "scheme": "cha",
     "slug": "Chacha",
     "userInterfaceStyle": "automatic",
-    "notification": { 
-      "icon": "./assets/logo/10.png",
-      "androidCollapsedTitle":"Chacha"
-     }, 
     "version": "0.0.1",
     "orientation": "portrait",
-    "icon": "./assets/logo/13.png",
+    "icon": "./assets/logo/3/1024.png",
     "splash": {
-      "image": "./assets/logo/splash5.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/logo/splash1.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#000000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -27,21 +23,25 @@
     },
     "android": {
       "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo/13.png",
+        "foregroundImage": "./assets/logo/3/res/mipmap-hdpi/3_adaptive_fore.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.mantle.ChaCha"
+      "package": "com.mantle.Chacha"
     },
     "web": {
-      "favicon": "./assets/logo/13.png"
+      "favicon": "./assets/logo/play_store_512.png"
     },
     "description": "",
+    "notification": {
+      "icon": "./assets/logo/notif.png"
+    },
     "plugins": [
       [
         "expo-notifications",
         {
-          "icon": "./assets/logo/10.png",
+          "icon": "./assets/logo/notif.png",
           "color": "#ffffff"
         }
       ]

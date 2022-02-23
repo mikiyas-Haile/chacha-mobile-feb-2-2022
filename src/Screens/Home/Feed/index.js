@@ -1,12 +1,20 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { View, Text, TouchableOpacity, Pressable, FlatList, Image } from 'react-native'
+import { View, Text, TouchableOpacity, Pressable, FlatList, Image, StyleSheet, Dimensions } from 'react-native'
 import { MainLookup } from '../../../Lookup'
 import { AppContext } from '../../../../AppContext'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import ActionBtns, { RenderPostBody } from './ActionBtns'
+import Swiper from 'react-native-swiper'
+import { PhotoCard } from '../Camera/index'
+import { useNavigation } from '@react-navigation/native'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import { host } from '../../../Components/host'
+
+const { width, height } = Dimensions.get('window')
 
 export default function FeedScreen() {
-    const ctx = useContext(AppContext)
+    const ctx = useContext(AppContext);
+    const nav = useNavigation();
     const [posts, setPosts] = useState([])
     const [postss, setPostss] = useState([])
     const [refreshing, setrefreshing] = useState(false)
@@ -32,24 +40,65 @@ export default function FeedScreen() {
             <PostCard item={item} key={item.id} />
         )
     }
+    
     return (
-        <FlatList onRefresh={LoadPostss} refreshing={refreshing} keyExtractor={(i, k) => k.toString()} data={postss} renderItem={renderData} />
+        <View style={{
+            flex: 1,
+            backgroundColor: ctx.bgColor,
+            // paddingTop: 50
+        }}>
+            <FlatList
+                ListFooterComponent={() => (
+                    <View style={{
+                        height: height / 2,
+                        width: width,
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <TouchableOpacity onPress={() => nav.push('Home', { screen: 'Create' })} style={{
+                            alignSelf: 'center',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderColor: ctx.textColor,
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            width: width / 3,
+                            height: height / 4,
+                            padding: 10
+                        }}>
+                            <Ionicons name='add-circle-outline' color={ctx.textColor} size={width / 4} />
+                            <Text style={{
+                                fontFamily: 'Poppins-Regular',
+                                textAlign: 'center',
+                                fontSize: 13,
+                                color: ctx.textColor,
+                            }} >Posts from friends and following will appear here</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                onRefresh={LoadPostss} refreshing={refreshing} keyExtractor={(i, k) => k.toString()} data={postss} renderItem={renderData} />
+        </View>
     )
 }
 
 export function PostCard(props) {
     const { item } = props
+    const nav = useNavigation()
     const ctx = useContext(AppContext)
     const DontShowViewButton = props.DontShowViewButton ? props.DontShowViewButton : true
     const isParent = props.isParent ? props.isParent : false
 
     const ViewProfile = (username) => {
-        nav.push('View Profile', { username: username })
+        // nav.push('View Profile', { username: username })
         // window.location.href = `/user/${username}`
+        nav.push('View Page', { url: `${host}/user/${username}` })
     }
     const ViewPost = (username, id) => {
         // window.location.href = `/${username}/${id}`
-        nav.push('View Post', { username: username, id: id })
+        nav.push('View Page', { url: `${host}/${username}/${id}` })
+    }
+    const callback = () => {
+
     }
     return (
         <>
@@ -79,11 +128,22 @@ export function PostCard(props) {
                             <Text style={{ fontFamily: 'Poppins-Regular', fontSize: 17, color: ctx.textColor }}>
                                 @{item.author.username}
                             </Text>
-                            {item.author.is_verified ? <AntDesign name='ai-fill=circle' size={17} color={'#00a2f9'} /> : null}
+                            {item.author.is_verified ? <AntDesign name='checkcircle' size={17} color={'#00a2f9'} /> : null}
                         </View>
                         <Text style={{ fontFamily: 'Poppins-Light', fontSize: 15, marginRight: 5, color: ctx.textColor }}>{DateAdded(item.date_added)}</Text>
                     </View>
                 </Pressable>
+
+                <Swiper
+                    // loop={false}
+                    activeDotColor={ctx.textColor}
+                    style={styles.wrapper}>
+                    {item.attachements.map((item, index) => {
+                        return (
+                            <PhotoCard key={index} DontShowTick={true} callback={callback} width_={width} height_={height / 2} item={item} index={index} />
+                        )
+                    })}
+                </Swiper>
                 <Text style={{ fontFamily: 'Poppins-Light', fontSize: 15, color: ctx.textColor }}>
                     <RenderPostBody isParent={isParent} status={item} isComment={false} />
                 </Text>
@@ -99,3 +159,8 @@ export function DateAdded(str) {
     var time = str.split("T")[1].split(".")[0]
     return dateCalender
 }
+const styles = StyleSheet.create({
+    wrapper: {
+        height: height / 2
+    }
+})

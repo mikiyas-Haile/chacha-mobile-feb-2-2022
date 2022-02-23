@@ -5,6 +5,242 @@ import AwesomeAlert from 'react-native-awesome-alerts';
 import { MainLookup } from '../../../../Lookup';
 import { host } from '../../../../Components/host'
 
+
+import React, { useEffect, useState, useContext } from 'react';
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import { MainLookup } from '../../../../Lookup'
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions, Image, Pressable, ScrollView } from 'react-native'
+import IonIcons from 'react-native-vector-icons/Ionicons'
+import EvilIcons from 'react-native-vector-icons/EvilIcons'
+import { AppContext } from '../../../../../AppContext'
+import { useNavigation } from '@react-navigation/native'
+import * as Contacts from 'expo-contacts';
+import { host } from '../../../../Components/host'
+
+const { height, width } = Dimensions.get('window')
+
+function Chats() {
+    const nav = useNavigation()
+    const ctx = useContext(AppContext);
+    const [Chats, setChats] = useState([]);
+    const [myContacts, setmyContacts] = useState([])
+    const [CSRFToken, setCSRFTOKEN] = useState()
+
+    // Fetching Csrf
+    useEffect(() => {
+        (async () => {
+            const { status } = await Contacts.requestPermissionsAsync();
+            if (status === 'granted') {
+                const { data } = await Contacts.getContactsAsync();
+
+                if (data.length > 0) {
+                    data.forEach(item => {
+                        if (item.phoneNumbers) {
+                            var number = item.phoneNumbers[0].number.replace(/\s/g,'')
+                            console.log(number)
+                            fetch(`${host}/csrf`, { method: "GET", headers: { 'Content-Type': 'application/json', }, })
+                                .then(data => data.json())
+                                .then(data => {
+                                    setCSRFTOKEN(data.csrf)
+                                    const cb = (r, c) => {
+                                        if (c === 200 || c === 201) {
+                                            console.log(r, c, number)
+                                            // setisUser(true)
+                                            setmyContacts(myContacts.concat(r))
+                                        } else {
+                                            // setisUser(false)
+                                        }
+                                    }
+                                    MainLookup(cb, {
+                                        csrf: data.csrf, endpoint: `/api/check-number`, method: 'POST', data: {
+                                            number: number
+                                        }
+                                    })
+                                })
+                                .catch(error => console.log(error))
+                        }
+                    })
+                }
+            }
+        })();
+    }, []);
+    useEffect(() => {
+        const timer = setInterval(() => {
+            const cb = (r, c) => {
+                if (c === 200 || c === 201) {
+                    setChats(r)
+                }
+            }
+            MainLookup(cb, { endpoint: `/api/chats`, method: 'GET' })
+        }, 5000)
+        return () => clearInterval(timer);
+    })
+    useEffect(() => {
+        nav.setOptions({
+            headerLeft: () => (
+                <>
+                    {ctx.requestUser &&
+                        <TouchableOpacity style={{
+                            paddingHorizontal: 20
+                        }} onPress={() => nav.push('My Profile')}>
+                            <Image style={{ height: 40, width: 40, borderRadius: 100 }} source={{ uri: ctx.requestUser.pfp }} />
+                        </TouchableOpacity>}
+                </>
+            )
+        })
+    }, [])
+
+    return (
+        <>
+            {!Chats.length > 0 && !myContacts.length > 0 ? <>
+                <View style={{
+                    height: height / 2,
+                    width: width,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
+                    <TouchableOpacity style={{
+                        alignSelf: 'center',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderColor: ctx.textColor,
+                        borderWidth: 1,
+                        borderRadius: 10,
+                        width: width / 3,
+                        height: height / 4,
+                    }}>
+                        <EvilIcons name='envelope' color={ctx.textColor} size={width / 4} />
+                        <Text style={{
+                            fontFamily: 'Poppins-Regular',
+                            textAlign: 'center',
+                            fontSize: 13,
+                            color: ctx.textColor,
+                        }} >Messages will appear here.</Text>
+                    </TouchableOpacity>
+                </View>
+            </> :
+                <ScrollView>
+                    <FlatList data={Chats} renderItem={({ item, index }) => (
+                        <RoomCard item={item} key={index} />
+                    )} />
+                    <FlatList ListHeaderComponent={() => (
+                        <Text style={{
+                            color: ctx.textColor,
+                            fontSize: 20,
+                            fontFamily: 'Poppins-Bold',
+                        }}>Start Chat</Text>
+                    )} data={myContacts} renderItem={({ item, index }) => {
+                        // console.log("Start ",item ," end")
+                        if (item.phoneNumbers) {
+                            return (
+                                <ContactCard item={item} numbers={item.phoneNumbers} number={item.phoneNumbers[0].number} />
+                            )
+                        } else {
+                            return <View />
+                        }
+                    }} />
+                </ScrollView>
+            }
+        </>
+    )
+}
+function ContactCard(props) {
+    const { item, numbers, number } = props;
+    const nav = useNavigation()
+    const ctx = useContext(AppContext);
+    const [isUser, setisUser] = useState(false)
+
+    return (
+        <Pressable onPress={() => isUser && nav.push("Room", { otherUser: user.username, notice: room.my_notice })} style={{
+            // flexDirection: 'row',
+            // alignItems: 'center',
+            // margin: 4,
+            padding: 7,
+            // borderBottomWidth: .3,
+            // borderTopWidth: .3,
+            borderColor: '#2c3e50',
+            textAlign: 'left'
+        }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{
+                    color: ctx.textColor,
+                    fontSize: 17,
+                    fontFamily: 'Poppins-Regular',
+                    marginRight: 5
+                }}>{item.name} - {number}</Text>
+            </View>
+            <Text style={{
+                color: ctx.textColor,
+                fontSize: 14,
+                fontFamily: 'Poppins-Bold'
+            }}>{isUser ? 'Tap to send message' : 'Invite'}
+            </Text>
+        </Pressable>
+    )
+}
+
+function RoomCard(props) {
+    const { item } = props
+    const ctx = useContext(AppContext);
+    const nav = useNavigation()
+    const myProfile = item.user_one.request_user === item.user_one.username ? 'user_one' : item.user_two.request_user === item.user_two.username ? 'user_two' : 'user_one'
+
+    if (myProfile === 'user_one') {
+        return (
+            <RenderUserForChat otherUser={'user_two'} room={item} user={item.user_two} />
+
+        )
+    } else if (myProfile === 'user_two') {
+        return (
+            <RenderUserForChat otherUser={"user_one"} room={item} user={item.user_one} />
+        )
+    }
+
+}
+function RenderUserForChat(props) {
+    const { user, room, otherUser } = props;
+    const ctx = useContext(AppContext);
+    const nav = useNavigation();
+    return (
+        <Pressable onPress={() => nav.push("Room", { otherUser: user.username, notice: room.my_notice })} style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            // margin: 4,
+            padding: 7,
+            borderBottomWidth: .3,
+            borderTopWidth: .3,
+            borderColor: '#2c3e50'
+        }}>
+            <Image style={{
+                width: 50,
+                height: 50,
+                borderRadius: 100,
+                marginRight: 10
+            }} source={{ uri: user.pfp }} />
+            <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{
+                        color: ctx.textColor,
+                        fontSize: 17,
+                        fontFamily: 'Poppins-Regular',
+                        marginRight: 5
+                    }}>{user.display_name}</Text>
+                    {user.is_verified ? <AntDesign name='checkcircle' size={17} color={'#00a2f9'} /> : null}
+                </View>
+
+                <Text style={{
+                    color: ctx.textColor,
+                    fontSize: 14,
+                    fontFamily: 'Poppins-Bold'
+                }}>{room.my_notice ? room.my_notice : 'Tap to send message'}
+                </Text>
+            </View>
+        </Pressable>
+    )
+}
+
+export default Chats;
+
 const { width, height } = Dimensions.get("screen")
 function ParsedDate(props) {
     var { date } = props

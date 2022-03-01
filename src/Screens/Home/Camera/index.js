@@ -11,6 +11,7 @@ import { MainLookup } from '../../../Lookup';
 import { host } from '../../../Components/host';
 import UploadImage from '../../../Components/UploadImage'
 import Swiper from 'react-native-swiper'
+import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get("screen")
@@ -33,7 +34,7 @@ export default function AddScreen() {
     useEffect(() => {
         _mediaLibraryAsync()
 
-        return() => {
+        return () => {
             setImages([]);
             setSelectedPictures([])
         }
@@ -55,18 +56,23 @@ export default function AddScreen() {
         }
     }
     const Continue = () => {
-        nav.push("Publish Pictures", { SelectedPictures: SelectedPictures })
+        if (SelectedPictures.length > 1) {
+            nav.push("Publish Pictures", { SelectedPictures: SelectedPictures })
+        } else {
+            const image = SelectedPictures[0]
+            nav.push("Edit Picture", { file: image, uri: image.uri, next: 'Publish Pictures' })
+        }
     }
     const PickPhotos = () => {
         nav.push("View My Pictures")
     }
-    const [state, setState] = useState({
-        isVisible: true,
-        uri: Images.length > 0 ? Images[0].uri : null
-    })
-    const onToggleModal = () => {
-        const { isVisible } = state
-        setState({ isVisible: !isVisible })
+
+    const [body, setBody] = useState('');
+    const Post = () => {
+        if (body) {
+            setBody('')
+            ctx.Post(body)
+        }
     }
     return (
         <>
@@ -103,32 +109,52 @@ export default function AddScreen() {
                         </TouchableOpacity>
                     </View>
                 )}
-                    ListHeaderComponent={() => (
-                        <>
-                            {Images.length > 0 &&
-                                <ImageBackground
-                                    blurRadius={100}
-                                    source={{ uri: Images.length > 0 && Images[0].uri }}
-                                    style={{
-                                        width: '100%',
-                                        height: height / 4,
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
-                                    <Image
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            margin: 2,
-                                            borderRadius: 5
-                                        }}
-                                        source={{ uri: Images.length > 0 && Images[0].uri }} />
-                                </ImageBackground>}</>
-                    )}
                     style={{ flex: 1 }} numColumns={3} key={(item, index) => (item.id)} data={Images}
                     renderItem={({ item, index }) => (
                         <PhotoCard callback={callback} item={item} index={index} />
                     )} />
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingVertical: 10,
+                }}>
+                    <TextInput
+                        maxLength={200}
+                        style={{
+                            padding: 5,
+                            textAlign: 'left',
+                            // borderRadius: 30,
+                            borderColor: '#2c3e50',
+                            fontFamily: 'Poppins-Regular',
+                            color: ctx.textColor,
+                            width: '80%',
+                            marginRight: 5
+                        }} multiline onChangeText={setBody} placeholder='Make a quick post' placeholderTextColor={'grey'} >
+                        {body.split(/(\s+)/).map((item, index) => {
+                            return (
+                                <Text key={index}
+                                    style={{
+                                        fontFamily:
+                                            item[0] === ("@")
+                                                || item[0] === ("#")
+                                                || item.includes("http://")
+                                                || item.includes("https://")
+                                                || item === '69'
+                                                || item === '69420'
+                                                ? 'Poppins-Bold' : 'Poppins-Regular',
+                                        color: ctx.textColor
+                                    }}>{item}</Text>
+                            )
+                        })}
+                    </TextInput>
+                    <TouchableOpacity onPress={Post} style={{
+                        // backgroundColor: '#0077ff',
+                        padding: 6,
+                        borderRadius: 100,
+                    }}>
+                        <EvilIcons name='share-apple' size={35} color={ctx.textColor} />
+                    </TouchableOpacity>
+                </View>
                 {SelectedPictures.length > 0 &&
                     <TouchableOpacity onPress={Continue} style={{
                         padding: 5,
@@ -241,18 +267,19 @@ export function PhotoCard(props) {
         }
     }
     return (
-        <Pressable onPress={Select}>
-            <ImageBackground blurRadius={1000} source={{ uri: item.uri }}
+        <Pressable style={{
+            marginBottom: 2,
+            marginHorizontal: 1,
+            borderRadius: 10
+        }} onPress={Select}>
+            <ImageBackground blurRadius={200} source={{ uri: item.uri }}
                 style={{
                     width: width_ ? width_ : width / 3,
                     height: height_ ? height_ : height / 4,
-                    backgroundColor: 'grey',
-                    margin: 2,
-                    borderRadius: 5,
-                    marginBottom: 3,
-                    padding: padding_ ? padding_ : 0
+                    // backgroundColor: 'ligtgrey',
+                    alignItems: 'center'
                 }}>
-                <Image resizeMode='cover'
+                <Image resizeMode='contain'
                     onPress={Select}
                     style={{ height: '100%', width: '100%' }}
                     source={{ uri: item.uri }} />
@@ -306,7 +333,7 @@ export function PublishPicture(props) {
             .then(data => { setCSRFTOKEN(data.csrf) })
             .catch(error => console.log(error))
     }, [])
-    
+
     const [msg, setMsg] = useState('')
     const [SnackBarOpacity, setSnackBarOpacity] = useState(0)
     const MyAlert = (msg) => {
@@ -325,6 +352,7 @@ export function PublishPicture(props) {
             AsyncStorage.setItem('current_user_username', r.author.username)
             AsyncStorage.setItem('current_user_email', r.author.email)
             setBody('')
+            ctx.setScreenIsLoading(false)
             if (c === 201) {
                 MyAlert('Post was made successfully')
                 setBody(body)
@@ -343,11 +371,12 @@ export function PublishPicture(props) {
     }
     const Post = () => {
         if (body) {
+            ctx.setScreenIsLoading(true)
             setPublishing(1)
             for (let i = 0; i < SelectedPictures.length; i++) {
                 const PictureUploadedHandlers = (r, c) => {
                     if (c === 201) {
-                        linkss = linkss.concat({type: "img", file: r})
+                        linkss = linkss.concat({ type: "img", file: r })
                         i = i + 1
                         if (linkss.length === SelectedPictures.length) {
                             HandlePost(linkss)
@@ -366,7 +395,7 @@ export function PublishPicture(props) {
                 paddingTop: 50,
                 paddingTop: 50,
             }}>
-                
+
                 <Swiper
                     activeDotColor={ctx.textColor}
                     style={styles.wrapper}>
@@ -408,7 +437,7 @@ export function PublishPicture(props) {
                                                 || item === '69'
                                                 || item === '69420'
                                                 ? 'Poppins-Bold' : 'Poppins-Regular',
-                                        color:  ctx.textColor
+                                        color: ctx.textColor
                                     }}>{item}</Text>
                             )
                         })}

@@ -33,16 +33,22 @@
     "web": {
       "favicon": "./assets/logo/play_store_512.png"
     },
-    "description": "",
+    "description": "Introducing stories",
     "notification": {
-      "icon": "./assets/logo/notif.png"
+      "icon": "./assets/logo/notif_1.png"
     },
     "plugins": [
       [
         "expo-notifications",
         {
-          "icon": "./assets/logo/notif.png",
+          "icon": "./assets/logo/notif_1.png",
           "color": "#ffffff"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
       ]
     ]

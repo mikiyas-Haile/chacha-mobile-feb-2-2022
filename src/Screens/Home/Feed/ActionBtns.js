@@ -8,6 +8,7 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { MainLookup } from '../../../Lookup'
 import { host } from '../../../Components/host'
 import * as WebBrowser from 'expo-web-browser';
+import { forwardRef, useRef } from "react"
 
 import React, { useContext, useEffect, useState } from 'react'
 
@@ -17,16 +18,16 @@ import { useNavigation } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get('window')
 
-const ICONSIZE = 27
+const ICONSIZE = 23
 const FONT_WEIGHT = 'Poppins-Light'
-const FONT_SIZE = 15
+const FONT_SIZE = 13
 
 
 export default function ActionBtns(props) {
     const nav = useNavigation();
     const ctx = useContext(AppContext);
 
-    const { item, isParent, DontShowViewButton } = props;
+    const { item, isParent, DontShowViewButton, likess, hasLikedd, sethasLikedd,setLikess } = props;
     const [likes, setLikes] = useState(item.likes.length > 0 ? item.likes.length : ' ');
     const [comments, setComments] = useState(item.comments > 0 ? item.comments : ' ');
     const [replies, setReplies] = useState(item.replies > 0 ? item.replies : ' ');
@@ -37,7 +38,8 @@ export default function ActionBtns(props) {
     const [hasDisLiked, setHasDisLiked] = useState(item.has_disliked);
 
     const DisLikeBtn = hasDisLiked ? <AntDesign name='dislike1' size={ICONSIZE} color="#2c3e50" /> : <AntDesign name='dislike2' size={ICONSIZE} color="#2c3e50" />
-    const LikeBtn = hasLiked ? <AntDesign name='like1' size={ICONSIZE} color="#fe2c55" /> : <AntDesign name='like2' size={ICONSIZE} color="#2c3e50" />
+    const realLike = hasLikedd ? hasLikedd : hasLiked;
+    const LikeBtn = realLike ? <AntDesign name='like1' size={ICONSIZE} color="#fe2c55" /> : <AntDesign name='like2' size={ICONSIZE} color="#2c3e50" />
     const [CSRFToken, setCSRFTOKEN] = useState()
     useEffect(() => {
         fetch(`${host}/csrf`, { method: "GET", headers: { 'Content-Type': 'application/json', }, })
@@ -49,12 +51,14 @@ export default function ActionBtns(props) {
         const cb = (r, c) => {
             if (c === 201 || c === 200) {
                 setLikes(r.likes.length > 0 ? r.likes.length : ' ')
+                setLikess(r.likes.length > 0 ? r.likes.length : ' ')
                 setComments(r.comments > 0 ? r.comments : ' ')
                 setReplies(r.replies > 0 ? r.replies : ' ')
                 setDisLikes(r.dislikes.length > 0 ? r.dislikes.length : '')
 
                 setHasDisLiked(r.has_disliked)
                 setHasLiked(r.has_liked)
+                sethasLikedd(r.has_liked)
             } else {
                 alert("There was an error. Please try again")
                 console.log(r, c)
@@ -90,21 +94,21 @@ export default function ActionBtns(props) {
             <View style={{ flexDirection: 'row' }}>
                 {likes > 0 || disLikes > 0 || replies > 0 || comments > 0 ?
                     <>
-                        <>{likes > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {likes} Likes <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text> </Text> : null}</>
+                        <>{likes > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {likess ? likess : likes} Likes <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text></Text> : null}</>
                         <>
-                            {disLikes > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}>  {disLikes} Dislikes <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text> </Text> : null}
+                            {disLikes > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {disLikes} Dislikes <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text></Text> : null}
                         </>
                         <>
-                            {comments > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}>  {comments} Comments <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text> </Text> : null}
+                            {comments > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {comments} Comments <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text></Text> : null}
                         </>
                         <>
-                            {replies > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}>  {replies} Reposts </Text> : null}
+                            {replies > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {replies} Reposts </Text> : null}
                         </>
                     </>
                     : null
                 }
             </View>
-            <View style={{ width: "30%", flexDirection: 'row', justifyContent: 'space-around' }}>
+            <View style={{ width: "30%", flexDirection: 'row', justifyContent: 'space-between' }}>
                 <TouchableOpacity onPress={Like}>
                     {LikeBtn}
                 </TouchableOpacity>
@@ -191,7 +195,6 @@ export function BodyRender(props) {
                     const val = item[0] === "#"
                     const ping = item[0] === '@'
                     const link = item.toLowerCase().includes('http') || item.toLowerCase().includes('https')
-                    console.log(link)
                     if (val || ping || link) {
                         if (val) {
                             return (
@@ -263,12 +266,12 @@ function ReturnWordTagOrText(item) {
 const styles = StyleSheet.create({
     normalWordInPostBody: {
         marginHorizontal: 2,
-        fontSize: 17,
+        fontSize: 15,
         fontFamily: 'Poppins-Regular'
     },
     colorTextInBodyTagAndMentionStyle: {
         fontFamily: 'Poppins-Bold',
-        fontSize: 17,
+        fontSize: 15,
         // color: "#fe2c55",
         marginHorizontal: 2,
     },

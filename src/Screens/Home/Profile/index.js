@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { View, Text, TouchableOpacity, Pressable, FlatList, Image, StyleSheet, Dimensions, ScrollView, useColorScheme, ImageBackground } from 'react-native'
+import { Modal, TouchableWithoutFeedback, View, Text, TouchableOpacity, Pressable, FlatList, Image, StyleSheet, Dimensions, ScrollView, useColorScheme, ImageBackground } from 'react-native'
 import { MainLookup } from '../../../Lookup'
 import { AppContext } from '../../../../AppContext'
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import Feather from 'react-native-vector-icons/Feather'
 import Swiper from 'react-native-swiper'
 import { PhotoCard } from '../Camera/index'
 import { useNavigation } from '@react-navigation/native'
@@ -11,7 +12,10 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import ToggleSwitch from 'toggle-switch-react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { host } from '../../../Components/host'
+import * as ImagePicker from 'expo-image-picker';
 import { reloadApp } from '../../../Components/ReloadApp'
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 const { width, height } = Dimensions.get('window')
 
@@ -34,19 +38,21 @@ export default function YourProfile() {
             AsyncStorage.removeItem("request_user")
             reloadApp()
         }
-        MainLookup(cb, { endpoint: `/api/rest-auth/logout`, method: 'POST', data:{
-            bye: 'bb'
-        } })
+        MainLookup(cb, {
+            endpoint: `/api/rest-auth/logout`, method: 'POST', data: {
+                bye: 'bb'
+            }
+        })
     }
 
     return (
         <>
             {user.username === undefined ?
                 <View style={{
-                    height: height / 2,
-                    width: width,
+                    flex: 1,
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    backgroundColor: ctx.bgColor
                 }}>
                     <TouchableOpacity style={{
                         alignSelf: 'center',
@@ -72,6 +78,7 @@ export default function YourProfile() {
                     flex: 1,
                     backgroundColor: ctx.bgColor,
                 }}>
+                    <RenderUserPfpsList user={user} />
                     <ImageBackground source={ctx.scheme === 'light' ? require('../../../../assets/settingsBgLight.png') : require('../../../../assets/settingsBg.png')} style={{
                         padding: 10,
                         flex: 1,
@@ -96,27 +103,6 @@ export default function YourProfile() {
                                     </Text>
                                 </TouchableOpacity>
                             </View>}
-                        <TouchableOpacity style={{
-                            position: 'relative',
-                            alignSelf: 'center'
-                        }}>
-                            <Image style={{
-                                width: 70,
-                                height: 70,
-                                borderRadius: 100,
-                            }} source={{ uri: user.pfp }} />
-                            <View style={{
-                                position: 'absolute',
-                                width: 70,
-                                height: 70,
-                                borderRadius: 100,
-                                opacity: .6,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}>
-                                <IonIcons style={{ backgroundColor: ctx.bgColor, borderRadius: 100 }} name='add' size={50} color={ctx.textColor} />
-                            </View>
-                        </TouchableOpacity>
                         <View>
                             <RenderTextWithPlaceholder onPress={() => nav.push("Change Full Name")} placeholder={'Full name'} string={user.display_name} />
                             <RenderTextWithPlaceholder onPress={() => alert("Usernames are not changeable.")} placeholder={'Unique user name'} string={user.username} />
@@ -140,9 +126,186 @@ export default function YourProfile() {
                     </ImageBackground>
                 </ScrollView>
             }
+            <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                position: 'absolute',
+                top: 20,
+                left: 0,
+                right: 0,
+                padding: 20,
+                alignItems: 'center'
+            }}>
+                <TouchableOpacity onPress={() => (nav.pop())} style={{ backgroundColor: '#17171795', padding: 10, borderRadius: 100 }}>
+                    <IonIcons name='arrow-back' color={'white'} size={25} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => (nav.push("View Profile", { user: user }))} style={{ backgroundColor: '#17171795', padding: 10, borderRadius: 100 }}>
+                    <Text style={{ color: 'white', fontFamily: 'Poppins-Black' }}>View Profile</Text>
+                </TouchableOpacity>
+            </View>
         </>
     )
 }
+export function RenderUserPfpsList(props) {
+    const { user } = props;
+    const pfps = props.pfps ? props.pfps : user.pfps
+    const viewing = props.viewing ? props.viewing : false
+    const ctx = useContext(AppContext);
+    const nav = useNavigation();
+    const [more, setshowMore] = useState(false);
+    const [HasEdited, setHasEdited] = useState(false);
+    const [Touched, setTouched] = useState(false);
+    const [image, setImage] = useState(user.pfps)
+    const [newImage, setnewImage] = useState()
+
+    const Publish = () => {
+        if (!viewing) {
+            const uri = newImage.uri
+            setTouched(false)
+            const cb = (id) => {
+                console.log(id)
+            }
+            ctx.AddPfp(uri, cb)
+        }
+    }
+
+    useEffect(() => {
+        setImage(user.pfps);
+    }, [user])
+
+    const PickImage = () => {
+        if (Touched && !viewing) {
+            Publish()
+        } else {
+            setshowMore(!more)
+        }
+    }
+    const OpenCamera = async () => {
+        if (!viewing) {
+            setshowMore(!more)
+            const result = ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+            })
+                .then(res => {
+                    console.log(res)
+                    if (!res.cancelled) {
+                        setTouched(true)
+                        setImage([res, ...image])
+                        setnewImage(res)
+                    }
+                })
+        }
+    }
+    const OpenLibrary = async () => {
+        if (!viewing) {
+            setshowMore(!more)
+            const result = ImagePicker.launchImageLibraryAsync({
+                allowsEditing: true,
+            })
+                .then(res => {
+                    if (!res.cancelled) {
+                        setImage([res, ...image])
+                        setTouched(true)
+                        setnewImage(res)
+                    }
+                })
+        }
+    }
+    const ppfss = pfps ? pfps : user.pfps
+    const ImageList = image ? image : ppfss
+    try {
+        return (
+            <>
+                <View style={{ position: 'relative' }}>
+                    <Swiper
+                        onTouchEnd={() => {
+                            nav.push("View Pictures", { imgs: ImageList })
+                        }}
+                        dotColor={ctx.bgColor}
+                        activeDotColor={ctx.textColor}
+                        style={{ height: height / 4 }}>
+                        {ImageList.map((item, index) => {
+                            return (
+                                <ImageBackground key={index} style={{ flex: 1 }} source={{ uri: item.uri }}>
+                                    <LinearGradient
+                                        colors={['#17171700', ctx.bgColor]}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 0, y: 1 }} style={{
+                                            flex: 1
+                                        }}>
+                                    </LinearGradient>
+                                </ImageBackground>
+
+                            )
+                        })}
+                    </Swiper>
+                    <TouchableOpacity onPress={PickImage} style={{
+                        position: 'absolute',
+                        bottom: 10,
+                        left: 10,
+                        borderRadius: 100,
+                        padding: 10
+                    }}>
+                        <Text style={{
+                            fontSize: 20,
+                            fontFamily: 'Poppins-Bold',
+                            color: ctx.textColor,
+                            height: 30
+                        }}>{user.display_name}
+
+                            {user.is_verified ? <AntDesign style={{ marginLeft: 5 }} name='checkcircle' size={17} color={'#00a2f9'} /> : null}
+                        </Text>
+                        <Text style={{
+                            fontSize: 17,
+                            fontFamily: 'Poppins-Regular',
+                            color: ctx.textColor
+                        }}>@{user.username}</Text>
+                    </TouchableOpacity>
+
+                    {!viewing ? <TouchableOpacity onPress={PickImage} style={{
+                        alignSelf: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: Touched ? 'green' : '#2c3e50',
+                        position: 'absolute',
+                        bottom: 10,
+                        right: 10,
+                        borderRadius: 100,
+                        padding: 15
+                    }}>
+                        <IonIcons name={Touched ? 'checkmark' : 'add'} size={30} color={'white'} />
+                    </TouchableOpacity> : null}
+                </View>
+                <Modal
+                    animated
+                    animationType={"slide"}
+                    statusBarTranslucent
+                    visible={more}
+                    transparent
+                    onDismiss={() => (setshowMore(false))}
+                    onRequestClose={() => (setshowMore(false))}>
+                    <TouchableWithoutFeedback onPress={() => (setshowMore(false))}>
+                        <View style={{ flex: 1, backgroundColor: '#00000000' }}>
+                            <View style={{ backgroundColor: ctx.bgColor, marginTop: 'auto', padding: 10, borderTopRightRadius: 20, borderTopLeftRadius: 20 }}>
+                                <View style={{ width: '10%', height: 5, borderRadius: 20, alignSelf: 'center', backgroundColor: "lightgray" }} />
+                                <TouchableOpacity onPress={OpenCamera} style={{ padding: 10, borderColor: '#2c3e50', flexDirection: 'row', alignItems: 'center' }}>
+                                    <EvilIcons size={50} name='camera' color={ctx.textColor} />
+                                    <Text style={{ color: ctx.textColor, fontFamily: 'Poppins-Medium', fontSize: 15 }}>Open Camera</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={OpenLibrary} style={{ padding: 10, borderColor: '#2c3e50', flexDirection: 'row', alignItems: 'center' }}>
+                                    <EvilIcons size={50} name='image' color={ctx.textColor} />
+                                    <Text style={{ color: ctx.textColor, fontFamily: 'Poppins-Medium', fontSize: 15 }}>Choose from Gallery</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            </>
+        )
+    } catch (e) {
+        return <View />
+    }
+}
+
 function RenderTextWithPlaceholder(props) {
     const { onPress, string, placeholder } = props;
     const ctx = useContext(AppContext);

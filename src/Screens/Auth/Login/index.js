@@ -137,22 +137,23 @@ function AddLoginPassword(props) {
             setLoading(true)
             const cb = (r, c) => {
                 console.log(r, c)
-                setLoading(false)
                 if (c === 200) {
                     if (r.key) {
                         const cbu = (r_, c_) => {
+                            setLoading(false)
                             if (!c_ === 200 || !c_ === 201) {
                                 AsyncStorage.removeItem("session_token")
                             } else {
-                                ctx.setCurrentUser(Email)
+                                // ctx.setCurrentUser(Email)
                                 AsyncStorage.setItem('current_user_email', Email)
                                 AsyncStorage.setItem('session_token', r.key)
+                                
+                                AsyncStorage.setItem("current_user_username", r.username)
+                                AsyncStorage.setItem("request_user", JSON.stringify(r))
                                 nav.reset({
                                     index: 0,
                                     routes: [{ name: 'Home' }],
                                 })
-                                AsyncStorage.setItem("current_user_username", r.username)
-                                AsyncStorage.setItem("request_user", JSON.stringify(r))
                             }
                         }
                         MainLookup(cbu, { method: 'GET', endpoint: `/api/me` })

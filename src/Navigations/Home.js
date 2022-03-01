@@ -51,19 +51,30 @@ function Screens() {
   const profileName = 'Chat'
   const globalName = 'Global'
   const [user, setUser] = useState([])
-
+  const fetchUser = () => {
+    const cb = (r, c) => {
+      if (!c === 200 || !c === 201) {
+        AsyncStorage.removeItem("session_token")
+      } else {
+        setUser(r)
+        AsyncStorage.setItem("current_user_username", r.username)
+        AsyncStorage.setItem("request_user", JSON.stringify(r))
+      }
+    }
+    MainLookup(cb, { method: 'GET', endpoint: `/api/me` })
+  }
   useEffect(() => {
     if (ctx.token) {
-      const cb = (r, c) => {
-        if (!c === 200 || !c === 201) {
-          AsyncStorage.removeItem("session_token")
+      
+      const Rcb = (e__, r__) => {
+        let user = JSON.parse(r__);
+        if (!user === null | !user === undefined) {
+          setUser(r__)
         } else {
-          setUser(r)
-          AsyncStorage.setItem("current_user_username", r.username)
-          AsyncStorage.setItem("request_user", JSON.stringify(r))
+          fetchUser();
         }
       }
-      MainLookup(cb, { method: 'GET', endpoint: `/api/me` })
+      AsyncStorage.getItem('request_user', Rcb)
     }
   }, [ctx.token]);
 
@@ -111,7 +122,7 @@ function Screens() {
             <TouchableOpacity style={{
               paddingHorizontal: 20
             }} onPress={() => nav.push('My Profile')}>
-              <Image style={{ height: 40, width: 40, borderRadius: 100 }} source={{ uri: user.pfp ? user.pfp : ctx.requestUser.pfp }} />
+              <Image style={{ height: 30, width: 30, borderRadius: 100 }} source={{ uri: user.pfp ? user.pfp : ctx.requestUser.pfp }} />
             </TouchableOpacity>
           </>
         )
@@ -119,7 +130,7 @@ function Screens() {
         <BottomTab.Screen name={profileName} component={Chats} />
         {/* <BottomTab.Screen name={globalName} component={MapScreen} /> */}
         <BottomTab.Screen options={{ headerShown: false }} name={createName} component={AddScreen} />
-        <BottomTab.Screen options={{ title: 'Chacha',
+        <BottomTab.Screen options={{ title: 'chacha',
          headerTitleStyle: {
           fontFamily: 'Cursive',
           color: ctx.textColor,

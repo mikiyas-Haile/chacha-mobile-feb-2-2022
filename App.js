@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { Platform, Text } from 'react-native';
+import { Platform, Text, ToastAndroid } from 'react-native';
 import { MainLookup } from './src/Lookup'
 import { useFonts } from 'expo-font'
 import AppLoading from 'expo-app-loading';
@@ -13,6 +13,15 @@ import firebase from "firebase";
 import * as Linking from 'expo-linking'
 
 const prefix = Linking.createURL('/', 'https://african-chacha.herokuapp.com')
+
+Notifications.setNotificationCategoryAsync('new_chat', [
+  {
+    actionId: 'Reply',
+    buttonTitle: 'Reply',
+    textInput: { submitButtonTitle: 'Reply', placeholder: 'Type Something' },
+    isAuthenticationRequired: false,
+  },
+])
 
 const firebaseConfig = {
   apiKey: "AIzaSyAerzaWKI8hibbhcbM-cGAsDlscudXELCs",
@@ -39,6 +48,26 @@ function NotificationHandlerApp() {
   const responseListener = useRef();
   const ctx = useContext(AppContext);
   const nav = useNavigation()
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      const type = response.notification.request.content.categoryIdentifier
+
+      if (type === 'new_chat') {
+        const body = response.userText
+        const first = response.notification.request.content.data.request_user
+        const second = response.notification.request.content.data.to_user
+        let room = first + '-' + second
+        const cb = (r, c) => {
+          console.log(r, c)
+          if (!c === 201) {
+            ToastAndroid.show("Was unable to send chat.", 20)
+          }
+        }
+        MainLookup(cb, { endpoint: `/api/chat/${room}/quick/${body}`, method: 'GET' })
+      }
+    });
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => {
@@ -132,7 +161,7 @@ function FontsHandlerApp() {
 }
 
 function LinkingHandlerApp() {
-  
+
 }
 export default function App() {
   const [data, setData] = useState(null);
@@ -172,6 +201,7 @@ export default function App() {
     }
 
   }, [])
+
 
   return (
     <NavigationContainer linking={linking}>

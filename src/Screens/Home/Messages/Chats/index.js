@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import { MainLookup } from '../../../../Lookup'
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions, Image, Pressable, ScrollView, Linking } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions, Image, Pressable, ScrollView, Linking, TextInput } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { AppContext } from '../../../../../AppContext'
@@ -9,6 +9,8 @@ import { useNavigation } from '@react-navigation/native'
 import * as Contacts from 'expo-contacts';
 import { host } from '../../../../Components/host'
 import { WebView } from 'react-native-webview';
+import * as ImagePicker from 'expo-image-picker';
+import DateAdded from '../../../../Components/DateAdded'
 
 
 const { height, width } = Dimensions.get('window')
@@ -17,7 +19,9 @@ function Chats() {
     const nav = useNavigation()
     const ctx = useContext(AppContext);
     const [Chats, setChats] = useState([]);
-
+    // useEffect(() => {
+    //     console.log(ctx.token)
+    // },[])
     useEffect(() => {
         const timer = setInterval(() => {
             const cb = (r, c) => {
@@ -37,11 +41,11 @@ function Chats() {
                 <TouchableOpacity onPress={() => nav.push("Contacts List")} style={{
                     paddingRight: 15
                 }}>
-                    <AntDesign name='adduser' size={30} color={ctx.scheme === 'light' ? '#fe2c55' : ctx.textColor} />
+                    <AntDesign name='adduser' size={30} color={ctx.scheme === 'dark' ? ctx.textColor : '#fe2c55'} />
                 </TouchableOpacity>
             )
         })
-        return ()=>{
+        return () => {
             setChats([])
         }
     }, [])
@@ -84,8 +88,11 @@ function Chats() {
 export function ContactList() {
     const nav = useNavigation()
     const ctx = useContext(AppContext);
+    const [body, setBody] = useState('')
     const [myContacts, setmyContacts] = useState([])
+    const [searchedContacts, setSearchedContacts] = useState([])
     const [CSRFToken, setCSRFTOKEN] = useState()
+    const [hasSearched, setHasSearched] = useState(false)
     useEffect(() => {
         (async () => {
             const { status } = await Contacts.requestPermissionsAsync();
@@ -105,12 +112,72 @@ export function ContactList() {
             setmyContacts([]);
         }
     }, []);
+    const Filter = () => {
+        setSearchedContacts([])
+        setHasSearched(false)
+        const filtered = myContacts.filter(obj => obj.name.includes(body))
+        setSearchedContacts(filtered)
+        setHasSearched(true)
+    }
+    useEffect(() => {
+        var randomContact = Math.floor(Math.random() * myContacts.length);
+        nav.setOptions({
+            headerTitle: () => (
+                <View style={{
+                    flexDirection: 'row',
+                    width: '80%'
+                }}>
+                <TextInput
+                    onSubmitEditing={Filter}
+                    returnKeyType={'search'}
+                    maxLength={200}
+                    style={{
+                        padding: 5,
+                        textAlign: 'left',
+                        borderColor: '#2c3e50',
+                        fontFamily: 'Poppins-Regular',
+                        color: ctx.textColor,
+                        width: '100%',
+                        fontSize: 17
+                        // marginRight: 5
+                    }} onChangeText={setBody} placeholder={`Search`} placeholderTextColor={'grey'} >
+                    {body.split(/(\s+)/).map((item, index) => {
+                        return (
+                            <Text key={index}
+                                style={{
+                                    fontFamily:
+                                        item[0] === ("@")
+                                            || item[0] === ("#")
+                                            || item.includes("http://")
+                                            || item.includes("https://")
+                                            || item === '69'
+                                            || item === '69420'
+                                            ? 'Poppins-Bold' : 'Poppins-Regular',
+                                    color: ctx.textColor
+                                }}>{item}</Text>
+                        )
+                    })}
+                </TextInput>
+                </View>
+            ),
+            headerRight: () => (
+                <TouchableOpacity onPress={Filter} style={{
+                    backgroundColor: '#0077ff',
+                    padding: 6,
+                    borderRadius: 100,
+                }}>
+                    <EvilIcons name='search' size={35} color={'#ffffff'} />
+                </TouchableOpacity>
+            )
+        })
+    })
+
     return (
         <View style={{
             flex: 1,
             backgroundColor: ctx.bgColor
         }}>
-            <FlatList data={myContacts} renderItem={({ item, index }) => {
+            <FlatList data={hasSearched ? searchedContacts : myContacts} renderItem={({ item, index }) => {
                 if (item.phoneNumbers) {
                     return (
                         <ContactCard CSRFToken={CSRFToken} item={item} numbers={item.phoneNumbers} number={item.phoneNumbers[0].number} />
@@ -128,7 +195,6 @@ function ContactCard(props) {
     const ctx = useContext(AppContext);
     const [isUser, setisUser] = useState(null)
     const [user, setUser] = useState([])
-
     useEffect(() => {
         const cb = (r, c) => {
             if (c === 200) {
@@ -209,6 +275,18 @@ function RenderUserForChat(props) {
     const { user, room, otherUser } = props;
     const ctx = useContext(AppContext);
     const nav = useNavigation();
+    // const [image, setImage] = useState([]);
+    // my_notice_date_added
+    const OpenCamera = async () => {
+        const result = ImagePicker.launchCameraAsync()
+            .then(res => {
+                console.log(res)
+                if (!res.cancelled) {
+                    nav.push("Room", { otherUser: user.username, notice: room.my_notice, initImage: res })
+                }
+            })
+        // console.log(result)
+    }
     return (
         <Pressable onPress={() => nav.push("Room", { otherUser: user.username, notice: room.my_notice })} style={{
             flexDirection: 'row',
@@ -233,18 +311,23 @@ function RenderUserForChat(props) {
                     {user.is_verified ? <AntDesign name='checkcircle' size={17} color={'#00a2f9'} /> : null}
                 </View>
 
-                <Text style={{
-                    color: ctx.textColor,
-                    fontSize: 14,
-                    fontFamily: 'Poppins-Bold'
-                }}>{room.my_notice ? room.my_notice : 'Tap to send message'}
-                </Text>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text style={{
+                        color: ctx.textColor,
+                        fontSize: 13,
+                        fontFamily: 'Poppins-Bold'
+                    }}>{room.my_notice ? room.my_notice : 'Tap to send message'}
+                    </Text>
+                    <Text numberOfLines={1} ellipsizeMode='tail' style={{ fontFamily: 'Poppins-Light', fontSize: 13, marginRight: 5, marginLeft: 5, color: ctx.textColor, opacity: .9 }}>
+                        • {DateAdded(room.my_notice_date_added)}
+                    </Text>
+                </View>
             </View>
             <View style={{
                 marginLeft: 'auto',
             }}>
-                <TouchableOpacity onPress={() => nav.push("Room", { otherUser: user.username, notice: room.my_notice })}>
-                    <EvilIcons name='envelope' size={50} color={ctx.scheme === 'light' ? "#fe2c55" : ctx.textColor} />
+                <TouchableOpacity onPress={OpenCamera}>
+                    <EvilIcons name='camera' size={50} color={ctx.scheme === 'light' ? "#fe2c55" : ctx.textColor} />
                 </TouchableOpacity>
             </View>
         </Pressable>

@@ -86,10 +86,10 @@ export default function ChatRoom(props) {
         FirstFetch()
 
         return () => {
-            setMessages([])
-            setHasSet(false)
-            setChange(false)
-            setImage([])
+            // setMessages([])
+            // setHasSet(false)
+            // setChange(false)
+            // setImage([])
         }
     }, [])
     useEffect(() => {
@@ -168,7 +168,7 @@ export default function ChatRoom(props) {
             } else {
                 setImage(image)
                 setBody(body)
-                MyAlert("Message couldn't be delievered.Please try again.")
+                ctx.MyAlert("Message couldn't be delievered.Please try again.")
             }
         }
         MainLookup(cb, {
@@ -312,7 +312,7 @@ export default function ChatRoom(props) {
                                 textAlign: 'center',
                                 fontSize: 13,
                                 color: ctx.textColor,
-                            }} >Messages with @{otherUser} will appear here.</Text>
+                            }} >{ctx.language === 'English' ? `Messages with @${otherUser} will appear here.` : `ከ @${otherUser} ጋር ያሎት ንግግር እዚህ ይታያል`}</Text>
                         </TouchableOpacity>
                     </View>
                 </>}
@@ -333,11 +333,11 @@ export default function ChatRoom(props) {
                 padding: 10,
                 alignItems: 'center',
                 borderTopWidth: 1,
-                borderColor: '#2c3e50',
+                borderColor: '#2c3e5050',
                 justifyContent: 'center',
             }}>
                 <TouchableOpacity onPressIn={startRecording} onPressOut={stopRecording} style={{
-                    backgroundColor: ctx.scheme === 'light' ? 'white' : '#2b2b2b',
+                    backgroundColor: ctx.scheme === 'light' ? ctx.bgColor : '#2b2b2b',
                     padding: 6,
                     borderRadius: 100,
                     marginRight: 2
@@ -345,7 +345,7 @@ export default function ChatRoom(props) {
                     <MaterialIcons name='keyboard-voice' size={27} color={ctx.textColor} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={PickImage} style={{
-                    backgroundColor: ctx.scheme === 'light' ? 'white' : '#2b2b2b',
+                    backgroundColor: ctx.scheme === 'light' ? ctx.bgColor : '#2b2b2b',
                     padding: 6,
                     borderRadius: 100,
                 }}>
@@ -357,12 +357,13 @@ export default function ChatRoom(props) {
                     style={{
                         padding: 5,
                         textAlign: 'left',
-                        // borderRadius: 30,
-                        borderColor: '#2c3e50',
+                        borderRadius: 30,
+                        borderColor: '#2c3e5050',
                         fontFamily: 'Poppins-Regular',
                         color: ctx.textColor,
                         width: '70%',
-                        marginRight: 5
+                        marginRight: 5,
+                        borderWidth: 1
                     }} multiline onChangeText={setBody} placeholder='What are you thinking about?' placeholderTextColor={'grey'} >
                     {body.split(/(\s+)/).map((item, index) => {
                         return (
@@ -463,7 +464,9 @@ function RoomMessageCard(props) {
             <Pressable onLongPress={Delete} style={{
                 backgroundColor: isMe ? '#0077ff' : ctx.scheme === 'light' ? 'white' : '#2b2b2b',
                 padding: 8,
-                borderRadius: 20,
+                borderRadius: 70,
+                borderBottomRightRadius: isMe ? 0 : 70,
+                borderTopLeftRadius: isMe ? 70 : 0,
                 paddingHorizontal: 10,
                 maxWidth: "80%",
                 borderColor: '#2c3e50',

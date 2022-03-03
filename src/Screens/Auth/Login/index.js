@@ -38,26 +38,14 @@ function AddLoginEmail() {
                     AsyncStorage.setItem("user_email", Email)
                     nav.push("Login Password", { Email: Email })
                 } else if (r.approved) {
-                    setMsg("There is no user found with this Email.")
-                    setSnackBarOpacity(1)
-                    setInterval(() => {
-                        setSnackBarOpacity(0)
-                        setMsg('')
-                    }, 5000)
+                    ctx.MyAlert("There is no user found with this Email.")
+                    
                 } else if (r.validation_error) {
-                    setMsg("Email is not valid. Please try again")
-                    setSnackBarOpacity(1)
-                    setInterval(() => {
-                        setSnackBarOpacity(0)
-                        setMsg('')
-                    }, 5000)
+                    ctx.MyAlert("Email is not valid. Please try again")
+                    
                 } else {
-                    setMsg("There was an error Please try again later.")
-                    setSnackBarOpacity(1)
-                    setInterval(() => {
-                        setSnackBarOpacity(0)
-                        setMsg('')
-                    }, 5000)
+                    ctx.MyAlert("There was an error Please try again later.")
+                    
                 }
             }
             MainLookup(cb, { endpoint: `/api/check-email/${Email}`, method: 'GET' })
@@ -159,19 +147,11 @@ function AddLoginPassword(props) {
                         MainLookup(cbu, { method: 'GET', endpoint: `/api/me` })
                     }
                 } else if (c === 400) {
-                    setMsg("Password was incorrect.")
-                    setSnackBarOpacity(1)
-                    setInterval(() => {
-                        setSnackBarOpacity(0)
-                        setMsg('')
-                    }, 5000)
+                    ctx.MyAlert("Password was incorrect.")
+                    
                 } else {
-                    setMsg("There was a problem. Please try again.")
-                    setSnackBarOpacity(1)
-                    setInterval(() => {
-                        setSnackBarOpacity(0)
-                        setMsg('')
-                    }, 5000)
+                    ctx.MyAlert("There was a problem. Please try again.")
+                    
                 }
             }
             MainLookup(cb, {

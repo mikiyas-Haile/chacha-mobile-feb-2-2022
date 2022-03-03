@@ -74,7 +74,7 @@ function Chats() {
                             textAlign: 'center',
                             fontSize: 13,
                             color: ctx.textColor,
-                        }} >Chats will appear here.</Text>
+                        }} >{ctx.language === 'English' ? `All of your chats will appear here. ` : `ሁሉም መልእቶ እዚህ ይታያል`}</Text>
                     </TouchableOpacity>
                 </View>
             </> :

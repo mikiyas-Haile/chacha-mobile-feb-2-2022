@@ -1,4 +1,4 @@
-import { Image, View, ImageBackground, Text, TouchableOpacity, TextInput, SafeAreaView, StyleSheet, Modal } from 'react-native'
+import { Image, View, ImageBackground, Text, TouchableOpacity, TextInput, SafeAreaView, StyleSheet, Modal, Dimensions } from 'react-native'
 import { useContext, useEffect, useState, useRef } from 'react'
 import { AppContext } from '../../../../AppContext'
 import { MainLookup } from '../../../Lookup'
@@ -12,6 +12,8 @@ import ImageViewer from 'react-native-image-zoom-viewer';
 import { host } from '../../../Components/host';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Swiper from 'react-native-swiper'
+
+const { height, width } = Dimensions.get(`window`)
 
 export default function ViewPicture(props) {
     const [publishing, setPublishing] = useState(0)
@@ -48,7 +50,7 @@ export default function ViewPicture(props) {
 
     return (
         <>
-            <ImageBackground style={{ height: '100%', width: '100%' }} source={{ uri: uri }}>
+            <ImageBackground style={{ height: `100%`, width: '100%' }} source={{ uri: uri }}>
             </ImageBackground>
             <View style={NavStyles}>
                 <TouchableOpacity onPress={() => (nav.pop())} style={ButtonBackgroundStyles}>
@@ -186,7 +188,7 @@ export function ViewDetailedImagesList(props) {
                 style={{ backgroundColor: ctx.bgColor }}>
                 {imgs.map((item, index) => {
                     return (
-                        <Image key={index} resizeMode='contain' style={{ flex: 1, backgroundColor: ctx.bgColor }} source={{ uri: item.uri }} />
+                        <Image key={index} resizeMode={`contain`} style={{ flex: 1, backgroundColor: ctx.bgColor }} source={{ uri: item.uri }} />
                     )
                 })}
             </Swiper>

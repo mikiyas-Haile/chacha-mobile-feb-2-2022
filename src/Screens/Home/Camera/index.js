@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View, TouchableOpacity, Dimensions, Image,
 import IonIcons from 'react-native-vector-icons/Ionicons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
+import ImageViewer from 'react-native-image-zoom-viewer';
 import * as MediaLibrary from 'expo-media-library';
 import { MainLookup } from '../../../Lookup';
 import { host } from '../../../Components/host';
@@ -105,7 +106,7 @@ export default function AddScreen() {
                                 textAlign: 'center',
                                 fontSize: 13,
                                 color: ctx.textColor,
-                            }} >View all pictures from my gallery</Text>
+                            }} >{ctx.language === 'English' ? 'View all pictures from my gallery' : 'ሁሉንም ፎቶዎቼን ልምልክት'}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -129,7 +130,7 @@ export default function AddScreen() {
                             color: ctx.textColor,
                             width: '80%',
                             marginRight: 5
-                        }} multiline onChangeText={setBody} placeholder='Make a quick post' placeholderTextColor={'grey'} >
+                        }} multiline onChangeText={setBody} placeholder={ctx.language === 'English' ? 'Make a quick post' : 'ፈጣን ቻቻ ላድርግ'} placeholderTextColor={'grey'} >
                         {body.split(/(\s+)/).map((item, index) => {
                             return (
                                 <Text key={index}
@@ -171,7 +172,7 @@ export default function AddScreen() {
                             color: ctx.bgColor,
                             fontFamily: 'Poppins-Bold',
                             fontSize: 20
-                        }}>Continue</Text></TouchableOpacity>}
+                        }}>{ctx.language === 'English' ? 'Continue' : 'ቀጥል'}</Text></TouchableOpacity>}
             </View>
         </>
     )
@@ -255,7 +256,7 @@ export function ViewAllPicturesFromGallery() {
 }
 
 export function PhotoCard(props) {
-    const { item, callback, width_, height_, padding_, } = props;
+    const { item, callback, width_, height_, padding_, Contain } = props;
     const DontShowTick = props.DontShowTick ? props.DontShowTick : false
     const [isSelected, setIsSelected] = useState(false)
     const Select = () => {
@@ -266,6 +267,7 @@ export function PhotoCard(props) {
             callback(item, 'selected')
         }
     }
+
     return (
         <Pressable style={{
             marginBottom: 2,
@@ -279,7 +281,7 @@ export function PhotoCard(props) {
                     // backgroundColor: 'ligtgrey',
                     alignItems: 'center'
                 }}>
-                <Image resizeMode='contain'
+                <Image resizeMode={!Contain ? 'contain' : `cover`}
                     onPress={Select}
                     style={{ height: '100%', width: '100%' }}
                     source={{ uri: item.uri }} />
@@ -293,9 +295,9 @@ export function PhotoCard(props) {
                     <Pressable onPress={Select} style={{
                         backgroundColor: isSelected ? 'lightgrey' : 'grey',
                         borderRadius: 100,
-                        padding: 5
+                        padding: 10
                     }}>
-                        <AntDesign name='check' color={isSelected ? '#2c3e50' : 'white'} size={15} />
+                        {/* <AntDesign name='check' color={isSelected ? '#2c3e50' : 'white'} size={15} /> */}
                     </Pressable>}
             </View>
         </Pressable>
@@ -308,22 +310,7 @@ export function PublishPicture(props) {
     const { SelectedPictures } = props?.route?.params;
     const ctx = useContext(AppContext);
     const [Images, setImages] = useState(SelectedPictures)
-    const callback = (item, type) => {
-        if (type === 'selected') {
-            try {
-                const NewSelects = SelectedPictures.concat(item)
-                setImages(NewSelects)
-            } catch (e) {
-                console.log(e)
-            }
-        } else {
-            try {
-                setImages(SelectedPictures => SelectedPictures.filter(item_ => item_.id !== item.id));
-            } catch (e) {
-                console.log(e)
-            }
-        }
-    }
+
     const [body, setBody] = useState('')
     const [CSRFToken, setCSRFTOKEN] = useState()
     // FETCH CSRFTOKEN
@@ -354,12 +341,12 @@ export function PublishPicture(props) {
             setBody('')
             ctx.setScreenIsLoading(false)
             if (c === 201) {
-                MyAlert('Post was made successfully')
+                ctx.MyAlert(ctx.language === 'English' ? 'Post was made successfully' : 'ቻቻዎ በስኬት ተለቋል')
                 setBody(body)
                 nav.push("Home")
                 setPublishing(0)
             } else {
-                MyAlert('There was an error trying to make post Please try again')
+                MyAlert(ctx.language === 'English' ? 'There was an error trying to make post Please try again' : 'ቻቻዎ ለመላክ ኣልተቻለም እባኮን ደግመው ሞክሩ')
             }
         }
         MainLookup(cb, {
@@ -400,8 +387,25 @@ export function PublishPicture(props) {
                     activeDotColor={ctx.textColor}
                     style={styles.wrapper}>
                     {Images.map((item, index) => {
+                        const images = [
+                            {
+                                url:
+                                    item.uri,
+                            },
+                        ]
                         return (
-                            <PhotoCard key={index} DontShowTick={true} callback={callback} width_={width} height_={height} item={item} index={index} />
+                                <ImageBackground blurRadius={200} source={{ uri: item.uri }}
+                                    style={{
+                                        width:  `100%`,
+                                        height:  height / 2,
+                                        // backgroundColor: 'ligtgrey',
+                                    }}>
+                                    <ImageViewer
+                                        imageUrls={images}
+                                        renderIndicator={() => null}
+                                        saveToLocalByLongPress={false}
+                                    />
+                                </ImageBackground>
                         )
                     })}
                 </Swiper>
@@ -423,7 +427,7 @@ export function PublishPicture(props) {
                             color: ctx.textColor,
                             width: '90%',
                             marginRight: 5
-                        }} multiline onChangeText={setBody} placeholder='What are you thinking about?' placeholderTextColor={'grey'} >
+                        }} multiline onChangeText={setBody} placeholder={ctx.language === 'English' ? 'What are you thinking about?' : 'ሀሳቦትን ያጋሩ፡  ምን እያሰቡ ነው?'} placeholderTextColor={'grey'} >
                         {body.split(/(\s+)/).map((item, index) => {
                             return (
                                 <Text key={index}

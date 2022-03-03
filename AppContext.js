@@ -16,9 +16,20 @@ export function AppProvider({ children }) {
   const [token, setToken] = useState()
   const [currentUser, setCurrentUser] = useState()
   const rootTheme = useColorScheme()
+  const [language, setLanguage] = useState('English');
   const [requestUser, setRequestUser] = useState([])
   const nav = useNavigation()
   useEffect(() => {
+    const langCb = (e, r) => {
+
+      if (!r) {
+        AsyncStorage.setItem('lang', language)
+      } else {
+        setLanguage(r)
+      }
+    }
+    AsyncStorage.getItem('lang', langCb)
+
     const themeCb = (e, r) => {
       if (!r) {
         AsyncStorage.setItem('theme', rootTheme)
@@ -33,12 +44,21 @@ export function AppProvider({ children }) {
     }
     AsyncStorage.getItem("session_token", cb)
     const ucb = (e, r) => {
-      console.log(r)
       setCurrentUser(r)
     }
     AsyncStorage.getItem("current_user_username", ucb)
   }, [])
-
+  const GetUser = () => {
+    const cb = (r, c) => {
+      if (!c === 200 || !c === 201) {
+        AsyncStorage.removeItem("session_token")
+      } else {
+        AsyncStorage.setItem("request_user", JSON.stringify(r))
+        setCurrentUser(r)
+      }
+    }
+    MainLookup(cb, { method: 'GET', endpoint: `/api/me` })
+  }
   useEffect(() => {
     if (token) {
       const cb = (r, c) => {
@@ -65,12 +85,15 @@ export function AppProvider({ children }) {
   }, [])
   const [scheme, setSchem] = useState(useColorScheme());
   const [ScreenIsLoading, setScreenIsLoading] = useState(false)
-  const [language, setLanguage] = useState('English');
-  const bgColor = scheme === 'dark' ? '#0d1216' : scheme === 'light' ? '#ededed' : scheme === 'color-blind' ? 'black' : 'white';
-  const textColor = scheme === 'light' ? '#2c3e50' : scheme === 'dark' ? '#e6e3e3' : scheme === 'color-blind' ? 'orange' : 'white';
+  const bgColor = scheme === 'dark' ? '#0d1216' : scheme === 'light' ? '#ededed' : scheme === 'color-blind' ? 'black' : scheme === 'ultra-dark' ? `black` : 'white';
+  const textColor = scheme === 'light' ? '#2c3e50' : scheme === 'dark' ? '#e6e3e3' : scheme === 'color-blind' ? 'orange' : scheme === 'ultra-dark' ? `#bdc1c6` : 'white';
   const setScheme = (theme) => {
     setSchem(theme);
     AsyncStorage.setItem('theme', theme)
+  }
+  const changeLan = (lan) => {
+    setLanguage(lan)
+    AsyncStorage.setItem('lang', lan)
   }
   const [CSRFToken, setCSRFTOKEN] = useState()
   // FETCH CSRFTOKEN
@@ -159,12 +182,13 @@ export function AppProvider({ children }) {
   }
   const Post = (body, callback) => {
     const cb = (r, c) => {
+      callback(r, c)
       setCurrentUser(r.author.username)
       AsyncStorage.setItem('current_user_username', r.author.username)
       AsyncStorage.setItem('current_user_email', r.author.email)
       setScreenIsLoading(false)
       if (c === 201) {
-        MyAlert("Post has been made successfully.")
+        MyAlert("Post has been made successfully")
       } else {
         alert('There was an error trying to make post Please try again')
       }
@@ -178,6 +202,7 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider
       value={{
+        GetUser,
         MyAlert,
         Post,
         bgColor,
@@ -194,7 +219,8 @@ export function AppProvider({ children }) {
         ScreenIsLoading,
         setScreenIsLoading,
         BackgroundFunction,
-        AddPfp
+        AddPfp,
+        changeLan
       }}>
       {ScreenIsLoading && <Progress.Bar color={'#fe2c55'} indeterminate={ScreenIsLoading} progress={.5} width={width} />}
       {children}

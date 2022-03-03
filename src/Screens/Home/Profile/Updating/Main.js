@@ -161,7 +161,7 @@ export function ChangeBio(props) {
                 color: ctx.textColor,
                 marginTop: 50
             }}>Add your Bio</Text>
-            <TextInput autoCapitalize='none' value={Bio} onChangeText={val => (setBio(val))}
+            <TextInput multiline autoCapitalize='none' value={Bio} onChangeText={val => (setBio(val))}
                 style={{
                     color: ctx.textColor,
                     fontFamily: 'Poppins-Bold',

@@ -36,6 +36,7 @@ if (firebase.apps.length === 0) {
   firebase.initializeApp(firebaseConfig);
 }
 function MainApp() {
+
   return (
     <MainScreen />
   )
@@ -124,14 +125,29 @@ function FontsHandlerApp() {
     'Poppins-ExtraLight': {
       uri: require('./assets/fonts/Poppins/Poppins-ExtraLight.ttf'),
     },
-    'Poppins-Regular': {
-      uri: require('./assets/fonts/Poppins/Poppins-Regular.ttf'),
-    },
     'Poppins-MediumItalic': {
       uri: require('./assets/fonts/Poppins/Poppins-MediumItalic.ttf'),
     },
     'Poppins-Medium': {
       uri: require('./assets/fonts/Poppins/Poppins-Medium.ttf'),
+    },
+    'Inter-Regular': {
+      uri: require('./assets/fonts/Inter/Inter-Regular.ttf'),
+    },
+    'Inter-Medium': {
+      uri: require('./assets/fonts/Inter/Inter-Medium.ttf'),
+    },
+    'Inter-Black': {
+      uri: require('./assets/fonts/Inter/Inter-Black.ttf'),
+    },
+    'Inter-Bold': {
+      uri: require('./assets/fonts/Inter/Inter-Bold.ttf'),
+    },
+    'Inter-Light': {
+      uri: require('./assets/fonts/Inter/Inter-Light.ttf'),
+    },
+    'Inter-SemiBold': {
+      uri: require('./assets/fonts/Inter/Inter-SemiBold.ttf'),
     },
     'Cursive': {
       uri: require('./assets/fonts/Rochester-Regular.ttf'),

@@ -275,15 +275,11 @@ function AddPassword(props) {
             const cb = (r, c) => {
                 setLoading(false)
                 if (c === 201) {
+                    ctx.GetUser()
                     ctx.setCurrentUser(Username)
                     AsyncStorage.setItem('current_user_email', Email)
                     AsyncStorage.setItem('current_user_username', Username)
-                    setMsg("Verification Code has been sent to your Email.")
-                    setSnackBarOpacity(1)
-                    setInterval(() => {
-                        setSnackBarOpacity(0)
-                        setMsg('')
-                    }, 3000)
+                    ctx.MyAlert("Verification Code has been sent to your Email.")
                     AsyncStorage.setItem('temp_token', r.key)
                     nav.push('Add Name', { Username, Email, Password, key: r.key })
                     AsyncStorage.setItem("current_step", 'Add Name')

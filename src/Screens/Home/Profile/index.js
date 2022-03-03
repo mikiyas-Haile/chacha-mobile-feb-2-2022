@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Modal, TouchableWithoutFeedback, View, Text, TouchableOpacity, Pressable, FlatList, Image, StyleSheet, Dimensions, ScrollView, useColorScheme, ImageBackground } from 'react-native'
+import { Modal, TouchableWithoutFeedback, View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Dimensions, ScrollView, useColorScheme, ImageBackground } from 'react-native'
 import { MainLookup } from '../../../Lookup'
 import { AppContext } from '../../../../AppContext'
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -15,7 +15,7 @@ import { host } from '../../../Components/host'
 import * as ImagePicker from 'expo-image-picker';
 import { reloadApp } from '../../../Components/ReloadApp'
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { Picker } from '@react-native-picker/picker';
 
 const { width, height } = Dimensions.get('window')
 
@@ -79,7 +79,7 @@ export default function YourProfile() {
                     backgroundColor: ctx.bgColor,
                 }}>
                     <RenderUserPfpsList user={user} />
-                    <ImageBackground source={ctx.scheme === 'light' ? require('../../../../assets/settingsBgLight.png') : require('../../../../assets/settingsBg.png')} style={{
+                    <View style={{
                         padding: 10,
                         flex: 1,
                     }}>
@@ -93,25 +93,43 @@ export default function YourProfile() {
                                     margin: 5,
                                 }}>
                                     <IonIcons name='warning' color={'orange'} size={20} />
-                                    <RenderTextWithPlaceholder color={'orange'} string={"Your Phone Number isn't verified."} />
+                                    <RenderTextWithPlaceholder color={'orange'} string={ctx.language === 'English' ? "Your Phone Number isn't verified." : `የተመዘገቡበት ስልክ አልተረጋገጠም`} />
                                     <Text style={{
                                         fontFamily: 'Poppins-Black',
                                         color: ctx.textColor,
                                         fontSize: 20,
                                     }}>
-                                        Verify
+                                        {ctx.language === 'English' ? "Verify" : `ላረጋገጥ`}
                                     </Text>
                                 </TouchableOpacity>
                             </View>}
                         <View>
-                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Full Name")} placeholder={'Full name'} string={user.display_name} />
-                            <RenderTextWithPlaceholder onPress={() => alert("Usernames are not changeable.")} placeholder={'Unique user name'} string={user.username} />
-                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Bio")} placeholder={'Your Biography'} string={user.bio ? user.bio : 'Add your Bio'} />
-                            <RenderTextWithPlaceholder onPress={() => alert("You can not change your Email at this moment.")} placeholder={'Email'} string={user.email} />
-                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Phone Number")} placeholder={'Phone Number'} string={user.phone_number} />
-                            <RenderTextWithPlaceholder onPress={() => alert("You can not update Country at this moment.")} placeholder={'Country'} string={user.country} />
-                            <RenderTextWithPlaceholder onPress={() => alert("You can not update Country code at this moment.")} placeholder={'Country Code'} string={user.country_code} />
+                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Full Name")} placeholder={ctx.language === 'English' ? "Full Name" : `ሙሉ ስም`} string={user.display_name} />
+                            <RenderTextWithPlaceholder onPress={() => alert("Usernames are not changeable.")} placeholder={ctx.language === 'English' ? "User name" : `የተጠቃሚ ስም`} string={user.username} />
+                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Bio")} placeholder={ctx.language === 'English' ? "Biography" : `አጭር ታሪክ`} string={user.bio ? user.bio : 'Add your Bio'} />
+                            <RenderTextWithPlaceholder onPress={() => alert("You can not change your Email at this moment.")} placeholder={ctx.language === 'English' ? "Email" : `ኢ-ሜል`} string={user.email} />
+                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Phone Number")} placeholder={ctx.language === 'English' ? "Phone Number" : `ስልክ ቁጥር`} string={user.phone_number} />
+                            <RenderTextWithPlaceholder onPress={() => alert("You can not update Country at this moment.")} placeholder={ctx.language === 'English' ? "Country" : `ሓግር`} string={user.country} />
+                            {/* <RenderTextWithPlaceholder onPress={() => alert("You can not update Country code at this moment.")} placeholder={'Country Code'} string={user.country_code} /> */}
                             <Notifications />
+                            <View>
+                                <Text style={{
+                                    color: ctx.textColor,
+                                    fontFamily: 'Poppins-Bold',
+                                    fontSize: 25,
+                                    // textAlign: 'center'
+                                }}>{ctx.language === 'English' ? "Language" : `ቋንቋ`}</Text>
+
+                                <Picker
+                                    dropdownIconColor={ctx.textColor}
+                                    themeVariant={`dark`}
+                                    selectedValue={ctx.language}
+                                    onValueChange={(itemVal, itemIndex) => ctx.changeLan(itemVal)}
+                                    style={{ fontFamily: `Poppins-Regular`, color: ctx.textColor, paddingHorizontal: 10, borderWidth: 1, borderColor: `#2c3e50`, borderRadius: 10 }}>
+                                    <Picker.Item fontFamily={`Poppins-Regular`} label={`Amharic`} value={`Amharic`} />
+                                    <Picker.Item fontFamily={`Poppins-Regular`} label={`English`} value={`English`} />
+                                </Picker>
+                            </View>
                             <SelectTheme />
                             <TouchableOpacity onPress={Logout}>
                                 <Text style={{
@@ -119,11 +137,11 @@ export default function YourProfile() {
                                     fontFamily: 'Poppins-Light',
                                     color: ctx.textColor
                                 }}>
-                                    Logout
+                                    {ctx.language === 'English' ? "Logout" : `ልውጣ`}
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                    </ImageBackground>
+                    </View>
                 </ScrollView>
             }
             <View style={{
@@ -239,7 +257,7 @@ export function RenderUserPfpsList(props) {
                             )
                         })}
                     </Swiper>
-                    <TouchableOpacity onPress={PickImage} style={{
+                    <TouchableOpacity style={{
                         position: 'absolute',
                         bottom: 10,
                         left: 10,
@@ -270,9 +288,9 @@ export function RenderUserPfpsList(props) {
                         bottom: 10,
                         right: 10,
                         borderRadius: 100,
-                        padding: 15
+                        padding: 10
                     }}>
-                        <IonIcons name={Touched ? 'checkmark' : 'add'} size={30} color={'white'} />
+                        <IonIcons name={Touched ? 'checkmark' : 'image'} size={30} color={'white'} />
                     </TouchableOpacity> : null}
                 </View>
                 <Modal
@@ -285,7 +303,7 @@ export function RenderUserPfpsList(props) {
                     onRequestClose={() => (setshowMore(false))}>
                     <TouchableWithoutFeedback onPress={() => (setshowMore(false))}>
                         <View style={{ flex: 1, backgroundColor: '#00000000' }}>
-                            <View style={{ backgroundColor: ctx.bgColor, marginTop: 'auto', padding: 10, borderTopRightRadius: 20, borderTopLeftRadius: 20 }}>
+                            <View style={{ backgroundColor: ctx.bgColor, marginTop: 'auto', padding: 10, borderTopRightRadius: 20, borderTopLeftRadius: 20, borderColor: '#2c3e50', borderWidth: 1 }}>
                                 <View style={{ width: '10%', height: 5, borderRadius: 20, alignSelf: 'center', backgroundColor: "lightgray" }} />
                                 <TouchableOpacity onPress={OpenCamera} style={{ padding: 10, borderColor: '#2c3e50', flexDirection: 'row', alignItems: 'center' }}>
                                     <EvilIcons size={50} name='camera' color={ctx.textColor} />
@@ -325,7 +343,7 @@ function RenderTextWithPlaceholder(props) {
             </Text>}
             <TouchableOpacity onPress={onPress}>
                 <Text style={{
-                    fontSize: 20,
+                    fontSize: 15,
                     fontFamily: 'Poppins-Bold',
                     color: color
                 }}>
@@ -367,9 +385,9 @@ function Notifications() {
         const cb = (r, c) => {
             console.log(r, c)
             if (c === 200) {
-                MyAlert("Successfully Updated Profile")
+                ctx.MyAlert("Successfully Updated Profile")
             } else {
-                MyAlert("Couldn't Update profile.Please try again later")
+                ctx.MyAlert("Couldn't Update profile.Please try again later")
             }
         }
         MainLookup(cb, { endpoint: `/api/update-profile`, method: 'PUT', csrf: CSRFToken, data: data })
@@ -380,17 +398,17 @@ function Notifications() {
         }}>
             <Text style={{
                 color: ctx.textColor,
-                fontFamily: 'Poppins-Black',
-                fontSize: 30,
-                textAlign: 'center'
-            }}>Notifications</Text>
-            <RenderStringWithSwitch type={'has_allowed_post_like_notifs'} callback={callback} placeholder={'Likes'} bool={user.has_allowed_post_like_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_reply_notifs'} callback={callback} placeholder={'Replies'} bool={user.has_allowed_reply_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_follow_notifs'} callback={callback} placeholder={'New followers'} bool={user.has_allowed_follow_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_recommendation_notifs'} callback={callback} placeholder={'Recommendations'} bool={user.has_allowed_recommendation_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_trending_notifs'} callback={callback} placeholder={'Trends'} bool={user.has_allowed_trending_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_new_chat_notifs'} callback={callback} placeholder={'New Chats'} bool={user.has_allowed_new_chat_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_new_post_from_following_notifs'} callback={callback} placeholder={'Posts from users I follow'} bool={user.has_allowed_new_post_from_following_notifs} />
+                fontFamily: 'Poppins-Bold',
+                fontSize: 25,
+                // textAlign: 'center'
+            }}>{ctx.language === 'English' ? "Notifications" : `ማሳወቂያዎች`}</Text>
+            <RenderStringWithSwitch type={'has_allowed_post_like_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "Likes" : `ላይኮች`} bool={user.has_allowed_post_like_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_reply_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "Replies" : `ምላሾች`} bool={user.has_allowed_reply_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_follow_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "New Followers" : `ኣዲስ ተከታዮች`} bool={user.has_allowed_follow_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_recommendation_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "Recommendations" : `ምክረ ሐሳቦች`} bool={user.has_allowed_recommendation_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_trending_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "Trends" : `አዝማሚያዎች`} bool={user.has_allowed_trending_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_new_chat_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "New Chats" : `ኣዲስ መልእክቶች`} bool={user.has_allowed_new_chat_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_new_post_from_following_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "New Posts from following" : `ኣዲስ ቻቻዎች ከምከተላቸው ሰዎች`} bool={user.has_allowed_new_post_from_following_notifs} />
             {msg ?
                 <View id="snackbar" style={{
                     opacity: SnackBarOpacity,
@@ -469,13 +487,27 @@ function SelectTheme() {
             }}>
                 <Text style={{
                     color: ctx.textColor,
-                    fontFamily: 'Poppins-Black',
-                    fontSize: 30,
-                    textAlign: 'center'
-                }}>Theme Settings</Text>
+                    fontFamily: 'Poppins-Bold',
+                    fontSize: 25,
+                    // textAlign: 'center'
+                }}>Theme</Text>
                 <View>
-                    <RenderStringWithSwitch type={'dark-mode'} callback={callback} placeholder={'Dark Mode'} bool={ctx.scheme === 'dark'} />
-                    <RenderStringWithSwitch type={'High-Contrast'} callback={callback} placeholder={'High Contrast Mode'} bool={ctx.scheme === 'color-blind'} />
+                    <Picker
+                        dropdownIconColor={ctx.textColor}
+                        themeVariant={`dark`}
+                        selectedValue={ctx.scheme}
+                        itemStyle={{ fontFamily: `Poppins-Regular` }}
+                        mode={`dropdown`}
+                        onValueChange={(itemVal, itemIndex) => ctx.setScheme(itemVal)}
+                        style={{ fontFamily: `Poppins-Regular`, color: ctx.textColor, paddingHorizontal: 10, borderWidth: 1, borderColor: `#2c3e50`, borderRadius: 10 }}>
+                        <Picker.Item style={{ fontFamily: `Poppins-Bold` }} fontFamily={`Poppins-Regular`} label={ctx.language === 'English' ? "Light Mode" : `ፈካ ያለ መልክ`} value={`light`} />
+                        <Picker.Item fontFamily={`Poppins-Regular`} label={ctx.language === 'English' ? "Dark Mode" : `ጨለም ያለ መልክ`} value={`dark`} />
+                        <Picker.Item fontFamily={`Poppins-Regular`} label={ctx.language === 'English' ? "Midnight Mode" : `ለሊት መልክ`} value={`ultra-dark`} />
+                        <Picker.Item fontFamily={`Poppins-Regular`} label={ctx.language === 'English' ? "High Contrast Mode" : `ጠንካራ ቀለሞች`} value={`color-blind`} />
+                    </Picker>
+                    {/* <RenderStringWithSwitch type={'dark-mode'} callback={callback} placeholder={ctx.language === 'English' ? "Dark Mode" : `ጨለም ያለ ግጥ`} bool={ctx.scheme === 'dark'} />
+                    <RenderStringWithSwitch type={'ultra-dark-mode'} callback={callback} placeholder={ctx.language === 'English' ? "Ultra Dark Mode" : `ለሊት ገጥ`} bool={ctx.scheme === 'ultra-dark-mode'} />
+                    <RenderStringWithSwitch type={'High-Contrast'} callback={callback} placeholder={ctx.language === 'English' ? "High Contrast Mode" : `ጠንካራ ቀለሞች`} bool={ctx.scheme === 'color-blind'} /> */}
                 </View>
             </View>
         </>

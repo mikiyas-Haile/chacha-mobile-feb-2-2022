@@ -21,20 +21,36 @@ export default function FeedScreen() {
     const [posts, setPosts] = useState([])
     const [postss, setPostss] = useState([])
     const [refreshing, setrefreshing] = useState(false)
+    const [nextUrl, setnext] = useState()
+    useEffect(() => {
+        if (nextUrl) {
+            const cb = (r, c) => {
+                if (c === 200) {
+                    setnext(r.next)
+                    // setPostss([...postss].concat(r.results))
+                    // setPostss([[...postss], [r.results]])
+                    setPostss([...new Set([...postss ,...r.results])])
+                }
+            }
+            MainLookup(cb, { method: 'GET', endpoint: `/api/post/${nextUrl.split("/").slice(-1)}` })
+        }
+    }, [nextUrl])
     const LoadPostss = () => {
         setrefreshing(true)
         const cb = (r, c) => {
             setrefreshing(false)
-            if (c === 200) { setPostss(r) }
+            if (c === 200) {
+                setPostss(r)
+            }
         }
         MainLookup(cb, { method: 'GET', endpoint: '/api/post/list' })
     }
-    useEffect(() => {
-        const cb = (r, c) => {
-            if (c === 200) { setPosts(r) }
-        }
-        MainLookup(cb, { method: 'GET', endpoint: '/api/post/feed' })
-    }, [])
+    // useEffect(() => {
+    //     const cb = (r, c) => {
+    //         if (c === 200) { setPosts(r) }
+    //     }
+    //     MainLookup(cb, { method: 'GET', endpoint: '/api/post/feed' })
+    // }, [])
     useEffect(() => {
         LoadPostss()
         return () => {
@@ -60,7 +76,12 @@ export default function FeedScreen() {
     const Post = () => {
         if (body) {
             setBody('')
-            ctx.Post(body)
+            const callback = (r, c) => {
+                if (c === 201) {
+                    setPostss([r, ...postss])
+                }
+            }
+            ctx.Post(body, callback)
         }
     }
     return (
@@ -85,7 +106,7 @@ export default function FeedScreen() {
                         color: ctx.textColor,
                         width: '80%',
                         marginRight: 5
-                    }} multiline onChangeText={setBody} placeholder='Make a quick post' placeholderTextColor={'grey'} >
+                    }} multiline onChangeText={setBody} placeholder={ctx.language === 'English' ? 'Make a quick post' : 'ፈጣን ቻቻ ላድርግ'} placeholderTextColor={'grey'} >
                     {body.split(/(\s+)/).map((item, index) => {
                         return (
                             <Text key={index}
@@ -136,7 +157,7 @@ export default function FeedScreen() {
                                 textAlign: 'center',
                                 fontSize: 13,
                                 color: ctx.textColor,
-                            }} >Posts from friends and following will appear here</Text>
+                            }} >{ctx.language === 'English' ? 'Posts from friends will appear here' : 'የወዳጅ ቻቻዎች እዚህ ይታያሉ'}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -164,7 +185,7 @@ export function PostCard(props) {
         // window.location.href = `/${username}/${id}`
         nav.push('View Page', { url: `${host}/${username}/${id}` })
     }
-    const hasImageInPost = item.attachements.length > 0
+    const hasImageInPost = item.attachements ? item.attachements.length : 0 > 0;
     const [showMore, setshowMore] = useState(false);
     let [backCount, setbackCount] = useState(0)
     const [CSRFToken, setCSRFTOKEN] = useState()
@@ -218,7 +239,7 @@ export function PostCard(props) {
             } else {
                 setLikess(item.likes.length)
                 sethasLikedd(false)
-                ctx.MyAlert("There was an error trying to like picture Please try again")
+                ctx.MyAlert(ctx.language === 'English' ? "There was an error trying to like picture Please try again" : 'ቻቻን መውደድ ኣልተቻለም እባኮን ትንሽ ቆይተው ይሞክሩ')
                 console.log(r, c)
             }
         }
@@ -234,12 +255,12 @@ export function PostCard(props) {
     return (
         <>
             <Pressable style={{
-                borderColor: '#2c3e50',
+                borderColor: ctx.scheme === 'light' ? 'lightgrey' : '#2c3e50',
                 borderRadius: 5,
                 backgroundColor: ctx.bgColor,
                 color: ctx.textColor,
                 position: 'relative',
-                borderBottomWidth: 5,
+                borderBottomWidth: 2,
                 paddingVertical: 10
             }}>
                 <Pressable onPress={() => (ViewProfile(item.author.username))} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 10 }}>
@@ -254,25 +275,25 @@ export function PostCard(props) {
                             <Text style={{ fontFamily: "Poppins-Bold", fontSize: 15, color: ctx.textColor }}>
                                 {item.author.display_name ? item.author.display_name : item.author.username}
                             </Text>
-                            {!hasImageInPost &&
+                            {!hasImageInPost ?
                                 <Text style={{ fontFamily: 'Poppins-Regular', fontSize: 15, color: ctx.textColor, opacity: .9 }}>
                                     @{item.author.username}
-                                </Text>}
+                                </Text> : null}
                             {item.author.is_verified ? <AntDesign style={{ marginLeft: 5 }} name='checkcircle' size={17} color={'#00a2f9'} /> : null}
-                            {hasImageInPost &&
+                            {hasImageInPost ?
                                 <Text style={{ fontFamily: 'Poppins-Light', fontSize: 13, marginRight: 5, marginLeft: 5, color: ctx.textColor, opacity: .9 }}>
                                     • {DateAdded(item.date_added)}
-                                </Text>}
+                                </Text>:null}
                         </View>
                     </View>
-                    {item.is_me &&
+                    {item.is_me ?
                         <TouchableOpacity onPress={() => setshowMore(!showMore)} style={{
                             marginLeft: 'auto'
                         }}>
                             <Feather name='more-vertical' size={20} color={ctx.textColor} />
-                        </TouchableOpacity>}
+                        </TouchableOpacity>:null}
                 </Pressable>
-                {hasImageInPost &&
+                {hasImageInPost ?
                     <View style={{
                         position: 'relative',
                         alignItems: 'center',
@@ -307,7 +328,7 @@ export function PostCard(props) {
                             <Ionicons name='heart' color={'#fe2c55'} size={100} />
                         </Animated.View>
                     </View>
-                }
+                :null}
                 <View style={{
                     padding: 10
                 }}>
@@ -318,12 +339,12 @@ export function PostCard(props) {
                         <Text style={{ fontFamily: 'Poppins-Light', fontSize: 13, color: ctx.textColor, opacity: .8 }}>
                             {SecondaryDateAdded(item.date_added)}
                         </Text>
-                        {!hasImageInPost &&
+                        {!hasImageInPost ?
                             <Text style={{ fontFamily: 'Poppins-Light', fontSize: 13, marginRight: 5, marginLeft: 5, color: ctx.textColor, opacity: .9 }}>
                                 • {DateAdded(item.date_added)}
-                            </Text>}
+                            </Text>:null}
                     </View>
-                    {SecondaryItem && <ActionBtns setLikess={setLikess} sethasLikedd={sethasLikedd} hasLikedd={hasLikedd} likess={likess} DontShowViewButton={DontShowViewButton} isParent={isParent} item={SecondaryItem} />}
+                    {SecondaryItem ? <ActionBtns setLikess={setLikess} sethasLikedd={sethasLikedd} hasLikedd={hasLikedd} likess={likess} DontShowViewButton={DontShowViewButton} isParent={isParent} item={SecondaryItem} />:null}
                 </View>
             </Pressable>
             <MoreModal callback={callback} setshowMore={setshowMore} showMore={showMore} item={item} />
@@ -335,7 +356,7 @@ function ImageCard({ item }) {
 
     return (
         <ImageBackground blurRadius={100} style={{ height: '100%', width: '100%' }} source={{ uri: item }}>
-            <Image resizeMode='contain' style={{ height: '100%', width: '100%' }} source={{ uri: item }} />
+            <Image style={{ height: '100%', width: '100%' }} source={{ uri: item }} />
         </ImageBackground>
         // <PhotoCard key={index} DontShowTick={true} callback={callback} width_={width} height_={height / 2} item={item} index={index} />
     )

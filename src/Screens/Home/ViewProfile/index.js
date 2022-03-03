@@ -192,6 +192,24 @@ function ProfileCard({ profile, pfps }) {
     return (
         <>
             {pfps.length > 0 && <RenderUserPfpsList pfps={pfps} viewing={true} user={profile} />}
+            {IsBlocked ?
+                <View>
+                    <View style={{
+                        borderRadius: 5,
+                        fontSize: 17,
+                        color: 'white',
+                        flexDirection: 'row',
+                        padding: 5,
+                        width: '50%',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderColor: '#2c3e50',
+                        borderWidth: 1,
+                        marginLeft: 5
+                    }}>
+                        <IonIcons name='warning' color={'red'} size={18} />
+                        <Text style={{ fontFamily: 'Poppins-Regular', color: ctx.textColor }}>Blocked by you</Text></View>
+                </View> : null}
             {/* Pfp / Following / Followers etc.. */}
             <View style={{
                 flexDirection: 'row',
@@ -210,23 +228,6 @@ function ProfileCard({ profile, pfps }) {
                 </View>
                 <View style={{ width: '60%' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        {IsBlocked ?
-                            <View>
-                                <View style={{
-                                    borderRadius: 5,
-                                    fontSize: 17,
-                                    color: 'white',
-                                    flexDirection: 'row',
-                                    padding: 5,
-                                    width: '50%',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    borderColor: '#2c3e50',
-                                    borderWidth: 1,
-                                }}>
-                                    <IonIcons name='warning' color={'red'} size={18} />
-                                    <Text style={{ fontFamily: 'Poppins-Regular', color: ctx.textColor }}>Blocked by you</Text></View>
-                            </View> : null}
                         {!IsFollowing && !IsMyProfile &&
                             <TouchableOpacity onPress={Follow} style={{
                                 padding: 5,

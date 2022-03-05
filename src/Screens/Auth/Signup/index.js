@@ -9,6 +9,8 @@ import { host } from '../../../Components/host'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import PhoneInput from "react-native-phone-number-input";
 import { FlashMode } from 'expo-camera/build/Camera.types'
+import DatePicker from 'react-native-date-picker'
+
 
 const Stack = createStackNavigator();
 
@@ -29,7 +31,7 @@ export default function Signup() {
         AsyncStorage.getItem('current_step', cb)
     }, [])
     return (
-        <Stack.Navigator initialRouteName={current_step} screenOptions={{
+        <Stack.Navigator initialRouteName={"Add Birth Date"} screenOptions={{
             headerShown: false,
         }}>
             <Stack.Screen name='Add Email' component={AddEmail} />
@@ -487,7 +489,7 @@ function AddPhone(props) {
 
                                 nav.push('Verify Phone Number', { key: key, PhoneNumber: PhoneNumber })
                                 AsyncStorage.setItem("phone_number", PhoneNumber)
-                                AsyncStorage.setItem("current_step", 'Verify Phone Number')
+                                // AsyncStorage.setItem("current_step", 'Verify Phone Number')
                             }, 5000)
                         } else {
                             MyAlert('There was an error trying to send. Please try again')
@@ -627,6 +629,7 @@ function VerifyPhoneNumber(props) {
         }
     }
 
+    const [date, setDate] = useState(new Date());
     return (
         <View style={{ flex: 1, backgroundColor: ctx.bgColor, color: ctx.textColor, padding: 30 }}>
             <Text style={{
@@ -635,6 +638,7 @@ function VerifyPhoneNumber(props) {
                 color: ctx.textColor,
                 marginTop: 50
             }}>Enter code you received.</Text>
+            <DatePicker date={date} onDateChange={setDate} />
             <TextInput secureTextEntry={true} keyboardType='number-pad' autoCapitalize='none' value={Code} onChangeText={val => (setCode(val))}
                 style={{
                     color: ctx.textColor,
@@ -759,6 +763,7 @@ function AddBirthDate(props) {
                     fontSize: 30
                 }}>{formattedDate ? 'Change Birthday' : 'Add Birthday'}</Text>
             </TouchableOpacity>
+            <DatePicker date={date} onDateChange={setDate} />
             {formattedDate ?
                 <TouchableOpacity onPress={() => setShow(true)} style={{
                     width: '90%',

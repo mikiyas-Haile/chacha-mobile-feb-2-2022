@@ -9,7 +9,7 @@ import { host } from '../../../Components/host'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import PhoneInput from "react-native-phone-number-input";
 import { FlashMode } from 'expo-camera/build/Camera.types'
-import DatePicker from 'react-native-date-picker'
+// import DatePicker from 'react-native-date-picker'
 
 
 const Stack = createStackNavigator();
@@ -31,7 +31,7 @@ export default function Signup() {
         AsyncStorage.getItem('current_step', cb)
     }, [])
     return (
-        <Stack.Navigator initialRouteName={"Add Birth Date"} screenOptions={{
+        <Stack.Navigator initialRouteName={current_step} screenOptions={{
             headerShown: false,
         }}>
             <Stack.Screen name='Add Email' component={AddEmail} />
@@ -763,7 +763,7 @@ function AddBirthDate(props) {
                     fontSize: 30
                 }}>{formattedDate ? 'Change Birthday' : 'Add Birthday'}</Text>
             </TouchableOpacity>
-            <DatePicker date={date} onDateChange={setDate} />
+            {/* <DatePicker date={date} onDateChange={setDate} /> */}
             {formattedDate ?
                 <TouchableOpacity onPress={() => setShow(true)} style={{
                     width: '90%',

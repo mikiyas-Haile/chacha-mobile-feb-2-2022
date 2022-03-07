@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as Progress from 'react-native-progress';
 import UploadImage from "./src/Components/UploadImage";
 import { host } from "./src/Components/host";
+import  Animated, { FadeIn, Layout, ZoomIn, ZoomOut } from 'react-native-reanimated'
 
 const { width, height } = Dimensions.get("window")
 
@@ -119,6 +120,7 @@ export function AppProvider({ children }) {
     MyAlert("Your post will appear shortly.")
     setScreenIsLoading(true)
     const PictureUploadedHandlers = (r_, c_) => {
+      console.log(r_,c_)
       if (c_ === 201) {
         const cb = (r, c) => {
           setCurrentUser(r.author.username)
@@ -127,7 +129,7 @@ export function AppProvider({ children }) {
           setScreenIsLoading(false)
           if (c === 201) {
             // MyAlert('Post was made successfully')
-            MyAlert("Post has been made successfully.")
+            MyAlert("Post has been made successfully")
           } else {
             alert('There was an error trying to make post Please try again')
           }
@@ -224,9 +226,10 @@ export function AppProvider({ children }) {
       }}>
       {ScreenIsLoading && <Progress.Bar color={'#fe2c55'} indeterminate={ScreenIsLoading} progress={.5} width={width} />}
       {children}
-      {msg ? <View id="snackbar"
+      {msg ? 
+      <Animated.View layout={Layout.delay(100)} exiting={ZoomOut} entering={ZoomIn} id="snackbar"
         style={{
-          opacity: SnackBarOpacity,
+          // opacity: SnackBarOpacity,
           backgroundColor: '#333',
           textAlign: 'center',
           borderRadius: 10,
@@ -236,13 +239,14 @@ export function AppProvider({ children }) {
           alignItems: 'center',
           justifyContent: 'center',
           alignSelf: 'center',
-        }}
-      >
+        }}>
         <Text style={{
           fontSize: 15,
+          textAlign: 'center',
           color: 'white',
           fontFamily: 'Poppins-Regular'
-        }}>{msg}</Text></View> : null}
+        }}>{msg}</Text></Animated.View> 
+        : null}
     </AppContext.Provider>
   );
 };

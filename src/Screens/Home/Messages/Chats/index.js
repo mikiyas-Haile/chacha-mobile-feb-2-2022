@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign'
-import { MainLookup } from '../../../../Lookup'
+import { MainLookup, FetchLookup } from '../../../../Lookup'
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions, Image, Pressable, ScrollView, Linking, TextInput } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
@@ -29,7 +29,7 @@ function Chats() {
                     setChats(r)
                 }
             }
-            MainLookup(cb, { endpoint: `/api/chats`, method: 'GET' })
+            FetchLookup(cb, { endpoint: `/api/chats`, method: 'GET' })
         }, 1000)
         return () => {
             clearInterval(timer);

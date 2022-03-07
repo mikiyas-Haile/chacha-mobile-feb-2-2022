@@ -194,6 +194,7 @@ function Editor(props) {
                 nav.push("View Picture", { uri: uri })
             });
         } else {
+            nav.push("View Picture", { uri: uri })
             // nav.push("Add Message to your sharing Image", { uri: uri })
         }
     }
@@ -233,13 +234,15 @@ function Editor(props) {
                                     }}>
                                         <Text style={{
                                             backgroundColor: !FontStyle.doesntNeedBg ? FontStyle.bgColor : `transparent`,
+                                            fontFamily: FontStyle.name ? FontStyle.name : FONTS[0].name,
+                                            fontSize: fontSize,
                                             // marginTop: `auto`
                                         }}>
                                             <Text style={{
                                                 // maxWidth: '80%',
                                                 backgroundColor: FontStyle.doesntNeedBg ? FontStyle.bgColor : `transparent`,
                                                 color: FontStyle.textColor ? FontStyle.textColor : `white`,
-                                                fontFamily: FontStyle.name,
+                                                fontFamily: FontStyle.name ? FontStyle.name : FONTS[0].name,
                                                 textAlign: textAlign,
                                                 padding: FontStyle.padding ? FontStyle.padding : 5,
                                                 fontSize: fontSize,
@@ -263,14 +266,14 @@ function Editor(props) {
                 top: 0,
                 width: `100%`,
                 position: `absolute`
-            }}/>
+            }} />
             <View style={{
                 backgroundColor: `#00000080`,
                 height: height / 4,
                 bottom: 0,
                 width: `100%`,
                 position: `absolute`
-            }}/>
+            }} />
             <View style={NavStyles}>
                 <TouchableOpacity onPress={() => (nav.pop())} style={ButtonBackgroundStyles}>
                     <AntDesign name='arrowleft' color={'white'} size={25} />

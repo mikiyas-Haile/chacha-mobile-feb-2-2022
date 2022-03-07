@@ -44,7 +44,11 @@ export default function YourProfile() {
             }
         })
     }
-
+    const ItemProps = {
+        color:"#2c3e50",
+        fontFamily:`Poppins-Regular`,
+        fontSize: 30
+    }
     return (
         <>
             {user.username === undefined ?
@@ -121,13 +125,20 @@ export default function YourProfile() {
                                 }}>{ctx.language === 'English' ? "Language" : `ቋንቋ`}</Text>
 
                                 <Picker
+                                    mode={`dropdown`}
                                     dropdownIconColor={ctx.textColor}
+                                    itemStyle={{ backgroundColor: 'red', color: 'red' }}
                                     themeVariant={`dark`}
                                     selectedValue={ctx.language}
                                     onValueChange={(itemVal, itemIndex) => ctx.changeLan(itemVal)}
                                     style={{ fontFamily: `Poppins-Regular`, color: ctx.textColor, paddingHorizontal: 10, borderWidth: 1, borderColor: `#2c3e50`, borderRadius: 10 }}>
-                                    <Picker.Item fontFamily={`Poppins-Regular`} label={`Amharic`} value={`Amharic`} />
-                                    <Picker.Item fontFamily={`Poppins-Regular`} label={`English`} value={`English`} />
+                                    <Picker.Item {...ItemProps} label={`Amharic`} value={`Amharic`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`Arabic`} value={`arabic`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`Swahili`} value={`swahili`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`French`} value={`french`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`Spanish`} value={`spanish`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`Africaans`} value={`africaans`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`English`} value={`english`} />
                                 </Picker>
                             </View>
                             <SelectTheme />

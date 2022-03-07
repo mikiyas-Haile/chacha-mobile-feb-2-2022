@@ -1,14 +1,8 @@
-// import { AiFillHeart, AiOutlineHeart, AiOutlineShareAlt, AiTwotoneLike, AiOutlineDislike, AiOutlineLike, AiTwotoneDislike } from "react-icons/ai";
-// import { FaRegComment } from "react-icons/fa";
-// import { GrFormNextLink } from "react-icons/gr";
 import { TouchableOpacity, Dimensions, Text, View, Pressable, StyleSheet, Linking, Alert } from 'react-native'
 import AntDesign from 'react-native-vector-icons/AntDesign'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { MainLookup } from '../../../Lookup'
 import { host } from '../../../Components/host'
-import * as WebBrowser from 'expo-web-browser';
-import { forwardRef, useRef } from "react"
+import { TranslateApi } from '../../../Components/Translate'
 
 import React, { useContext, useEffect, useState } from 'react'
 
@@ -60,7 +54,7 @@ export default function ActionBtns(props) {
                 setHasLiked(r.has_liked)
                 sethasLikedd(r.has_liked)
             } else {
-                alert("There was an error. Please try again")
+                ctx.MyAlert("There was an error. Please try again")
                 console.log(r, c)
             }
         }
@@ -94,15 +88,15 @@ export default function ActionBtns(props) {
             <View style={{ flexDirection: 'row' }}>
                 {likes > 0 || disLikes > 0 || replies > 0 || comments > 0 ?
                     <>
-                        <>{likes > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {likess ? likess : likes} Likes <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text></Text> : null}</>
+                        <>{likes > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {likess ? likess : likes} { ctx.language === 'Amharic' ? "ወደውታል" : TranslateApi({ str: 'Likes', id : 5 })} <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text></Text> : null}</>
                         <>
-                            {disLikes > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {disLikes} Dislikes <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text></Text> : null}
+                            {disLikes > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {disLikes} { ctx.language === 'Amharic' ? "ኣልወደዱትም" : TranslateApi({ str: 'Dislikes', id : 6 })} <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text></Text> : null}
                         </>
                         <>
-                            {comments > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {comments} Comments <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text></Text> : null}
+                            {comments > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {comments} { ctx.language === 'Amharic' ? "ኣስተያየት ሰጠዋል" : TranslateApi({ str: 'Comments', id : 7 })} <Text style={{ fontSize: 13, marginRight: 5 }}> • </Text></Text> : null}
                         </>
                         <>
-                            {replies > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {replies} Reposts </Text> : null}
+                            {replies > 0 ? <Text style={{ fontFamily: FONT_WEIGHT, fontSize: FONT_SIZE, color: ctx.textColor }}> {replies} { ctx.language === 'Amharic' ? "ምላሾች ኣሉት" : TranslateApi({ str: 'Reposts', id : 8 })} </Text> : null}
                         </>
                     </>
                     : null

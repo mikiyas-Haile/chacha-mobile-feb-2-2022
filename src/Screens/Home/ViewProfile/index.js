@@ -211,102 +211,8 @@ function ProfileCard({ profile, pfps }) {
                         <Text style={{ fontFamily: 'Poppins-Regular', color: ctx.textColor }}>Blocked by you</Text></View>
                 </View> : null}
             {/* Pfp / Following / Followers etc.. */}
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around'
-            }}>
-                <View style={{
-                    width: '25%'
-                }}>
-                    {pfps.length > 0 &&
-                        <Image style={{
-                            width: 70,
-                            height: 70,
-                            borderRadius: 100,
-                            marginHorizontal: 10
-                        }} source={{ uri: pfps[0].uri }} />}
-                </View>
-                <View style={{ width: '60%' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        {!IsFollowing && !IsMyProfile &&
-                            <TouchableOpacity onPress={Follow} style={{
-                                padding: 5,
-                                width: '50%',
-                                borderColor: '#2c3e50',
-                                borderWidth: 1,
-                                borderRadius: 100,
-                                alignItems: 'center',
-                                marginHorizontal: 3,
-                            }}>
-                                <Text style={{ color: ctx.textColor, fontFamily: 'Poppins-Medium' }}>Follow</Text>
-                            </TouchableOpacity>}
-                        {IsFollowing || IsFriends &&
-                            <TouchableOpacity style={{
-                                padding: 5,
-                                width: '50%',
-                                borderColor: '#2c3e50',
-                                borderWidth: 1,
-                                borderRadius: 100,
-                                alignItems: 'center'
-                            }}>
-                                <Text style={{ color: ctx.textColor, fontFamily: 'Poppins-Medium' }}>Message</Text>
-                            </TouchableOpacity>}
-                    </View>
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        width: '100%',
-                    }}>
-                        <View style={{
-                            alignItems: 'center'
-                        }}>
-                            <Text style={NumberStyles}>{Followers}</Text>
-                            <Text style={NumberStyles}>Followers</Text>
-                        </View>
-                        <View style={{
-                            alignItems: 'center'
-                        }}>
-                            <Text style={NumberStyles}>{Following}</Text>
-                            <Text style={NumberStyles}>Following</Text>
-                        </View>
-                        <View style={{
-                            alignItems: 'center'
-                        }}>
-                            <Text style={NumberStyles}>{Posts}</Text>
-                            <Text style={NumberStyles}>Posts</Text>
-                        </View>
-                    </View>
-                    {IsFriends && IsFollowing ?
-                        <View style={{
-                            borderRadius: 5,
-                            fontSize: 17,
-                            color: '#fe2c55',
-                            backgroundColor: '#fe2c55',
-                            flexDirection: 'row',
-                            padding: 5,
-                            width: '50%',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginVertical: 5
-                        }}>
-                            <Text style={{ fontFamily: 'Poppins-Regular', color: 'white' }}>Friends</Text>
-                        </View> : null}
-                    {!IsFriends && IsFollowing ?
-                        <View style={{
-                            borderRadius: 5,
-                            fontSize: 17,
-                            backgroundColor: '#2c3e50',
-                            flexDirection: 'row',
-                            padding: 5,
-                            width: '50%',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginVertical: 5
-                        }}>
-                            <Text style={{ fontFamily: 'Poppins-Regular', color: 'white' }}>Following</Text>
-                        </View> : null}
-                </View>
-            </View>
+
+            <ActionBtns IsFollowing={IsFollowing} IsMyProfile={IsMyProfile} Follow={Follow} IsFriends={IsFriends} NumberStyles={NumberStyles} Followers={Followers} Following={Following} Posts={Posts} />
 
             <View style={{
                 padding: 10
@@ -331,13 +237,13 @@ function ProfileCard({ profile, pfps }) {
                         <Feather name='more-vertical' size={20} color={'white'} />
                     </TouchableOpacity>
                 </View>}
-            <MoreModal IsMyProfile={IsMyProfile} HasBlocked={HasBlocked} IsFollowing={IsFollowing} callback={ModalCallback} item={profile} showMore={showMore} setshowMore={setshowMore} />
+            <MoreModal IsBlocked={IsBlocked} IsMyProfile={IsMyProfile} HasBlocked={HasBlocked} IsFollowing={IsFollowing} callback={ModalCallback} item={profile} showMore={showMore} setshowMore={setshowMore} />
         </>
     )
 }
 
 
-function MoreModal({ item, showMore, setshowMore, callback, IsFollowing, HasBlocked, IsMyProfile }) {
+function MoreModal({ item, showMore, setshowMore, callback, IsFollowing, HasBlocked, IsMyProfile, IsBlocked }) {
     const more = showMore;
     const ctx = useContext(AppContext);
     const nav = useNavigation();
@@ -372,7 +278,7 @@ function MoreModal({ item, showMore, setshowMore, callback, IsFollowing, HasBloc
                             </TouchableOpacity> : null}
                         {!IsMyProfile ?
                             <TouchableOpacity onPress={Block} style={{ padding: 10, borderColor: '#2c3e50' }}>
-                                <Text style={{ color: HasBlocked ? '#2c3e50' : 'red', fontFamily: 'Poppins-Medium', fontSize: 15 }}>{HasBlocked ? `Unblock @${item.username}` : `Block @${item.username}`}</Text>
+                                <Text style={{ color: HasBlocked ? '#2c3e50' : 'red', fontFamily: 'Poppins-Medium', fontSize: 15 }}>{IsBlocked ? `Unblock @${item.username}` : `Block @${item.username}`}</Text>
                             </TouchableOpacity> : null}
                     </View>
                 </View>
@@ -421,4 +327,117 @@ function RenderBio({ str }) {
     else {
         return <View />
     }
+}
+function ActionBtns({ IsFollowing, IsMyProfile, Follow, IsFriends, NumberStyles, Followers, Following, Posts }) {
+    return (<View style={{
+        flexDirection: 'row',
+        justifyContent: 'space-around'
+    }}>
+        <View style={{
+            width: '25%'
+        }}>
+            {pfps.length > 0 && <Image style={{
+                width: 70,
+                height: 70,
+                borderRadius: 100,
+                marginHorizontal: 10
+            }} source={{
+                uri: pfps[0].uri
+            }} />}
+        </View>
+        <View style={{
+            width: '60%'
+        }}>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                {!IsFollowing && !IsMyProfile && <TouchableOpacity onPress={Follow} style={{
+                    padding: 5,
+                    width: '50%',
+                    borderColor: '#2c3e50',
+                    borderWidth: 1,
+                    borderRadius: 100,
+                    alignItems: 'center',
+                    marginHorizontal: 3
+                }}>
+                    <Text style={{
+                        color: ctx.textColor,
+                        fontFamily: 'Poppins-Medium'
+                    }}>Follow</Text>
+                </TouchableOpacity>}
+                {IsFollowing || IsFriends && <TouchableOpacity style={{
+                    padding: 5,
+                    width: '50%',
+                    borderColor: '#2c3e50',
+                    borderWidth: 1,
+                    borderRadius: 100,
+                    alignItems: 'center'
+                }}>
+                    <Text style={{
+                        color: ctx.textColor,
+                        fontFamily: 'Poppins-Medium'
+                    }}>Message</Text>
+                </TouchableOpacity>}
+            </View>
+            <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                width: '100%'
+            }}>
+                <View style={{
+                    alignItems: 'center'
+                }}>
+                    <Text style={NumberStyles}>{Followers}</Text>
+                    <Text style={NumberStyles}>Followers</Text>
+                </View>
+                <View style={{
+                    alignItems: 'center'
+                }}>
+                    <Text style={NumberStyles}>{Following}</Text>
+                    <Text style={NumberStyles}>Following</Text>
+                </View>
+                <View style={{
+                    alignItems: 'center'
+                }}>
+                    <Text style={NumberStyles}>{Posts}</Text>
+                    <Text style={NumberStyles}>Posts</Text>
+                </View>
+            </View>
+            {IsFriends && IsFollowing ? <View style={{
+                borderRadius: 5,
+                fontSize: 17,
+                color: '#fe2c55',
+                backgroundColor: '#fe2c55',
+                flexDirection: 'row',
+                padding: 5,
+                width: '50%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginVertical: 5
+            }}>
+                <Text style={{
+                    fontFamily: 'Poppins-Regular',
+                    color: 'white'
+                }}>Friends</Text>
+            </View> : null}
+            {!IsFriends && IsFollowing ? <View style={{
+                borderRadius: 5,
+                fontSize: 17,
+                backgroundColor: '#2c3e50',
+                flexDirection: 'row',
+                padding: 5,
+                width: '50%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginVertical: 5
+            }}>
+                <Text style={{
+                    fontFamily: 'Poppins-Regular',
+                    color: 'white'
+                }}>Following</Text>
+            </View> : null}
+        </View>
+    </View>);
 }

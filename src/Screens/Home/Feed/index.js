@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { View, Text, TouchableOpacity, Pressable, FlatList, Image, StyleSheet, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, TextInput, Animated } from 'react-native'
-import { MainLookup } from '../../../Lookup'
+import { View, Text, TouchableOpacity, Pressable, FlatList, Image, StyleSheet, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, TextInput } from 'react-native'
+import { MainLookup, FetchLookup } from '../../../Lookup'
 import { AppContext } from '../../../../AppContext'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
@@ -12,6 +12,9 @@ import { useNavigation } from '@react-navigation/native'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { host } from '../../../Components/host'
 import DateAdded, { SecondaryDateAdded } from '../../../Components/DateAdded'
+import { TranslateApi } from '../../../Components/Translate'
+import  Animated, { FadeIn, Layout, ZoomIn, ZoomOut, SlideInUp, SlideOutUp } from 'react-native-reanimated'
+
 
 const { width, height } = Dimensions.get('window')
 
@@ -29,10 +32,10 @@ export default function FeedScreen() {
                     setnext(r.next)
                     // setPostss([...postss].concat(r.results))
                     // setPostss([[...postss], [r.results]])
-                    setPostss([...new Set([...postss ,...r.results])])
+                    setPostss([...new Set([...postss, ...r.results])])
                 }
             }
-            MainLookup(cb, { method: 'GET', endpoint: `/api/post/${nextUrl.split("/").slice(-1)}` })
+            FetchLookup(cb, { method: 'GET', endpoint: `/api/post/${nextUrl.split("/").slice(-1)}` })
         }
     }, [nextUrl])
     const LoadPostss = () => {
@@ -43,7 +46,7 @@ export default function FeedScreen() {
                 setPostss(r)
             }
         }
-        MainLookup(cb, { method: 'GET', endpoint: '/api/post/list' })
+        FetchLookup(cb, { method: 'GET', endpoint: '/api/post/list' })
     }
     // useEffect(() => {
     //     const cb = (r, c) => {
@@ -84,55 +87,28 @@ export default function FeedScreen() {
             ctx.Post(body, callback)
         }
     }
+    const listRef = React.useRef()
+    const [offset, setoffset] = useState(0)
+    const [showInput, setShowInput] = useState(true)
+
     return (
         <View style={{
             flex: 1,
             backgroundColor: ctx.bgColor,
-            // paddingTop: 50
         }}>
-            <View style={{
-                flexDirection: 'row',
-                alignSelf: 'center',
-                paddingVertical: 10
-            }}>
-                <TextInput
-                    maxLength={200}
-                    style={{
-                        padding: 5,
-                        textAlign: 'left',
-                        // borderRadius: 30,
-                        borderColor: '#2c3e50',
-                        fontFamily: 'Poppins-Regular',
-                        color: ctx.textColor,
-                        width: '80%',
-                        marginRight: 5
-                    }} multiline onChangeText={setBody} placeholder={ctx.language === 'English' ? 'Make a quick post' : 'ፈጣን ቻቻ ላድርግ'} placeholderTextColor={'grey'} >
-                    {body.split(/(\s+)/).map((item, index) => {
-                        return (
-                            <Text key={index}
-                                style={{
-                                    fontFamily:
-                                        item[0] === ("@")
-                                            || item[0] === ("#")
-                                            || item.includes("http://")
-                                            || item.includes("https://")
-                                            || item === '69'
-                                            || item === '69420'
-                                            ? 'Poppins-Bold' : 'Poppins-Regular',
-                                    color: ctx.textColor
-                                }}>{item}</Text>
-                        )
-                    })}
-                </TextInput>
-                <TouchableOpacity onPress={Post} style={{
-                    // backgroundColor: '#0077ff',
-                    padding: 6,
-                    borderRadius: 100,
-                }}>
-                    <EvilIcons name='share-apple' size={35} color={ctx.textColor} />
-                </TouchableOpacity>
-            </View>
+            {showInput && <MakeAQuickPostRenderer ref={listRef} setBody={setBody} TranslateApi={TranslateApi} Post={Post} body={body} />}
+
             <FlatList
+                onScroll={(event) => {
+                    var currentOffset = event.nativeEvent.contentOffset.y;
+                    var direction = currentOffset > offset ? 'down' : 'up';
+                    setoffset(currentOffset);
+                    if (direction === 'down'){
+                        setShowInput(false)
+                    } else {
+                        setShowInput(true)
+                    }
+                }}
                 ListFooterComponent={() => (
                     <View style={{
                         height: height / 2,
@@ -157,7 +133,7 @@ export default function FeedScreen() {
                                 textAlign: 'center',
                                 fontSize: 13,
                                 color: ctx.textColor,
-                            }} >{ctx.language === 'English' ? 'Posts from friends will appear here' : 'የወዳጅ ቻቻዎች እዚህ ይታያሉ'}</Text>
+                            }} >{ctx.language === 'Amharic' ? 'የወዳጅ ቻቻዎች እዚህ ይታያሉ' : TranslateApi({str: "Posts from friends will appear here", id:  0})}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -190,32 +166,20 @@ export function PostCard(props) {
     let [backCount, setbackCount] = useState(0)
     const [CSRFToken, setCSRFTOKEN] = useState()
     useEffect(() => {
-        fetch(`${host}/csrf`, { method: "GET", headers: { 'Content-Type': 'application/json', }, })
+        fetch(`${host}/csrf`, { method: "GET", headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${ctx.token}`, }, })
             .then(data => data.json())
             .then(data => { setCSRFTOKEN(data.csrf) })
             .catch(error => console.log(error))
     }, [])
-    const [heartVisibility, setheartVisibility] = useState(0)
     const [likess, setLikess] = useState()
     const [hasLikedd, sethasLikedd] = useState(item.has_liked)
-    const [state, setState] = useState({
-        fadeAnimation: new Animated.Value(0),
-        // size:
-    })
+    const [showHeart, setShowHeart] = useState(false)
 
     const fadeIn = () => {
-        Animated.timing(state.fadeAnimation, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true
-        }).start();
+        setShowHeart(true)
     };
     const fadeOut = () => {
-        Animated.timing(state.fadeAnimation, {
-            toValue: 0,
-            duration: 500,
-            useNativeDriver: true
-        }).start();
+        setShowHeart(false)
     };
     const ShowHeart = () => {
         // setheartVisibility(1)
@@ -235,11 +199,11 @@ export function PostCard(props) {
             if (c === 201 || c === 200) {
                 setLikess(r.likes.length)
                 setSecondaryItem(r)
-                // ctx.MyAlert("You have liked Picture")
+                ctx.MyAlert(ctx.language === 'Amharic' ? 'መውደዶን ገልትዋል' : TranslateApi({str: "You Have Liked Picture", id: 1}))
             } else {
                 setLikess(item.likes.length)
                 sethasLikedd(false)
-                ctx.MyAlert(ctx.language === 'English' ? "There was an error trying to like picture Please try again" : 'ቻቻን መውደድ ኣልተቻለም እባኮን ትንሽ ቆይተው ይሞክሩ')
+                ctx.MyAlert(ctx.language === 'Amharic' ? 'መውደዶን መግልጥ ኣልተቻለም እባኮን ትንሽ ቆይተው ይሞክሩ' : TranslateApi({str: "There was an error trying to like picture Please try again", id: 1}))
                 console.log(r, c)
             }
         }
@@ -283,7 +247,7 @@ export function PostCard(props) {
                             {hasImageInPost ?
                                 <Text style={{ fontFamily: 'Poppins-Light', fontSize: 13, marginRight: 5, marginLeft: 5, color: ctx.textColor, opacity: .9 }}>
                                     • {DateAdded(item.date_added)}
-                                </Text>:null}
+                                </Text> : null}
                         </View>
                     </View>
                     {item.is_me ?
@@ -291,7 +255,7 @@ export function PostCard(props) {
                             marginLeft: 'auto'
                         }}>
                             <Feather name='more-vertical' size={20} color={ctx.textColor} />
-                        </TouchableOpacity>:null}
+                        </TouchableOpacity> : null}
                 </Pressable>
                 {hasImageInPost ?
                     <View style={{
@@ -320,15 +284,16 @@ export function PostCard(props) {
                             })}
                         </Swiper>
 
-                        <Animated.View style={{
-                            opacity: state.fadeAnimation,
-                            position: 'absolute',
-                            alignSelf: 'center'
-                        }}>
-                            <Ionicons name='heart' color={'#fe2c55'} size={100} />
-                        </Animated.View>
+                        {showHeart ?
+                            <Animated.View exiting={ZoomOut} entering={ZoomIn} style={{
+                                position: 'absolute',
+                                alignSelf: 'center'
+                            }}>
+                                <Ionicons name='heart' color={'#fe2c55'} size={100} />
+                            </Animated.View>
+                            : null}
                     </View>
-                :null}
+                    : null}
                 <View style={{
                     padding: 10
                 }}>
@@ -342,9 +307,9 @@ export function PostCard(props) {
                         {!hasImageInPost ?
                             <Text style={{ fontFamily: 'Poppins-Light', fontSize: 13, marginRight: 5, marginLeft: 5, color: ctx.textColor, opacity: .9 }}>
                                 • {DateAdded(item.date_added)}
-                            </Text>:null}
+                            </Text> : null}
                     </View>
-                    {SecondaryItem ? <ActionBtns setLikess={setLikess} sethasLikedd={sethasLikedd} hasLikedd={hasLikedd} likess={likess} DontShowViewButton={DontShowViewButton} isParent={isParent} item={SecondaryItem} />:null}
+                    {SecondaryItem ? <ActionBtns setLikess={setLikess} sethasLikedd={sethasLikedd} hasLikedd={hasLikedd} likess={likess} DontShowViewButton={DontShowViewButton} isParent={isParent} item={SecondaryItem} /> : null}
                 </View>
             </Pressable>
             <MoreModal callback={callback} setshowMore={setshowMore} showMore={showMore} item={item} />
@@ -392,7 +357,7 @@ function MoreModal({ item, showMore, setshowMore, callback }) {
                         <View style={{ width: '10%', height: 5, borderRadius: 20, alignSelf: 'center', backgroundColor: "lightgray" }} />
                         {item.is_me ?
                             <TouchableOpacity onPress={Delete} style={{ padding: 10, borderColor: '#2c3e50' }}>
-                                <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: 15 }}>Delete Post</Text>
+                                <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: 15 }}>{ctx.language === 'Amharic' ? 'ቻቻዬን ኣጥፋ' : TranslateApi({str: "Delete Post", id:  9})}</Text>
                             </TouchableOpacity> : null}
                     </View>
                 </View>
@@ -401,7 +366,46 @@ function MoreModal({ item, showMore, setshowMore, callback }) {
     )
 }
 
+function MakeAQuickPostRenderer({ setBody, TranslateApi, index, Post, body }) {
+    const ctx = useContext(AppContext);
+    const nav = useNavigation();
+    return (
+    <Animated.View exiting={SlideOutUp} entering={SlideInUp} style={{
+        flexDirection: 'row',
+        alignSelf: 'center',
+        borderBottomWidth: 1,
+        borderColor: '#2c3e50',
+        paddingVertical: 10
+    }}>
+        <TextInput maxLength={200} style={{
+            padding: 5,
+            textAlign: 'left',
+            // borderRadius: 30,
+            borderColor: '#2c3e50',
+            fontFamily: 'Poppins-Regular',
+            color: ctx.textColor,
+            width: '80%',
+            marginRight: 5
+        }} multiline onChangeText={setBody} placeholder={ctx.language === 'Amharic' ? 'ፈጣን ቻቻ ላድርግ' : TranslateApi({str: "Make a quick Post", id: 2})} placeholderTextColor={'grey'}>
+            {body.split(/(\s+)/).map((item, index) => {
+                return <Text key={index} style={{
+                    fontFamily: item[0] === "@" || item[0] === "#" || item.includes("http://") || item.includes("https://") || item === '69' || item === '69420' ? 'Poppins-Bold' : 'Poppins-Regular',
+                    color: ctx.textColor
+                }}>{item}</Text>;
+            })}
+        </TextInput>
+        <TouchableOpacity onPress={Post} style={{
+            // backgroundColor: '#0077ff',
+            padding: 6,
+            borderRadius: 100
+        }}>
+            <EvilIcons name='share-apple' size={35} color={ctx.textColor} />
+        </TouchableOpacity>
+    </Animated.View>);
+}
+
 const styles = StyleSheet.create({
+
     wrapper: {
         height: height / 2
     }

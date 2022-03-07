@@ -15,6 +15,7 @@ import { MainLookup } from '../Lookup'
 import AddScreen from '../Screens/Home/Camera'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MapScreen from '../Screens/Home/Map'
+import { TranslateApi } from '../Components/Translate'
 
 
 const BottomTab = createBottomTabNavigator();
@@ -24,22 +25,6 @@ export default function HomeScreen() {
   const ctx = useContext(AppContext);
   return (
     <Screens />
-    // <Drawer.Navigator drawerContent={() => {
-    //   return <Chats />
-    // }} screenOptions={{
-    //   headerStyle: {
-    //     backgroundColor: ctx.bgColor,
-    //   },
-    //   headerTitleStyle: {
-    //     fontFamily: 'Poppins-Bold',
-    //     color: ctx.textColor
-    //   },
-    //   headerTitleAlign: 'center',
-    //   headerLeft: null,
-    //   tabBarStyle: { backgroundColor: ctx.bgColor },
-    // }}>
-    //   <Drawer.Screen options={{ headerShown: false }} name='Home Screens' component={Screens} />
-    // </Drawer.Navigator>
   )
 }
 
@@ -65,7 +50,7 @@ function Screens() {
   }
   useEffect(() => {
     if (ctx.token) {
-      
+
       const Rcb = (e__, r__) => {
         let user = JSON.parse(r__);
         if (!user === null | !user === undefined) {
@@ -101,7 +86,7 @@ function Screens() {
           return focused ? <FontAwesome name={iconName} size={25} color={color} /> : <EvilIcons name={iconName} size={35} color={color} />
         }
         else if (rn === globalName) {
-          iconName='location'
+          iconName = 'location'
           return focused ? <Ionicons name={iconName} size={25} color={color} /> : <Ionicons name={iconName} size={35} color={color} />
         }
       },
@@ -110,6 +95,8 @@ function Screens() {
       <BottomTab.Group screenOptions={{
         headerStyle: {
           backgroundColor: ctx.bgColor,
+          borderBottomWidth: 5,
+          borderColor: "#2c3e50"
         },
         headerTitleStyle: {
           fontFamily: 'Poppins-Bold',
@@ -127,16 +114,24 @@ function Screens() {
           </>
         )
       }}>
-        <BottomTab.Screen name={profileName} component={Chats} />
+        <BottomTab.Screen options={{
+          title: 'chat',
+          headerTitleStyle: {
+            fontFamily: 'Cursive',
+            color: ctx.textColor,
+            fontSize: 30
+          },
+        }} name={profileName} component={Chats} />
         {/* <BottomTab.Screen name={globalName} component={MapScreen} /> */}
         <BottomTab.Screen options={{ headerShown: false }} name={createName} component={AddScreen} />
-        <BottomTab.Screen options={{ title: 'chacha',
-         headerTitleStyle: {
-          fontFamily: 'Cursive',
-          color: ctx.textColor,
-          fontSize: 30
-        },
-       }} name={homeName} component={FeedScreen} />
+        <BottomTab.Screen options={{
+          title: 'chacha',
+          headerTitleStyle: {
+            fontFamily: 'Cursive',
+            color: ctx.textColor,
+            fontSize: 30
+          },
+        }} name={homeName} component={FeedScreen} />
       </BottomTab.Group>
     </BottomTab.Navigator>
   )

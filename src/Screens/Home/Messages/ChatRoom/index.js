@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react'
-import { MainLookup } from '../../../../Lookup'
+import { MainLookup, FetchLookup } from '../../../../Lookup'
 import { AppContext } from '../../../../../AppContext'
 import { useNavigation } from '@react-navigation/native'
 import { Text, View, TextInput, TouchableOpacity, FlatList, Dimensions, Pressable, Image } from 'react-native'
@@ -61,7 +61,7 @@ export default function ChatRoom(props) {
                     console.log("second Fetch finished")
                     setHasSet(set ? set : false)
                 }
-                MainLookup(cb, { endpoint: `/api/chat/${r_}-${otherUser}`, method: 'GET' })
+                FetchLookup(cb, { endpoint: `/api/chat/${r_}-${otherUser}`, method: 'GET' })
             }
             AsyncStorage.getItem("current_user_username", ucb)
         }
@@ -77,7 +77,7 @@ export default function ChatRoom(props) {
                 console.log("First Fetch Successfully ended")
                 console.log("Changed")
             }
-            MainLookup(cb, { endpoint: `/api/chat/${r_}-${otherUser}/get`, method: 'GET' })
+            FetchLookup(cb, { endpoint: `/api/chat/${r_}-${otherUser}/get`, method: 'GET' })
         }
         AsyncStorage.getItem("current_user_username", ucb)
     }
@@ -134,7 +134,7 @@ export default function ChatRoom(props) {
                             )
                         }
                     }
-                    MainLookup(cb, { endpoint: `/api/chat/${currentUser}-${otherUser}/has-new-chat`, method: 'GET' })
+                    FetchLookup(cb, { endpoint: `/api/chat/${currentUser}-${otherUser}/has-new-chat`, method: 'GET' })
                 }
             }
         }, 100)
@@ -464,9 +464,9 @@ function RoomMessageCard(props) {
             <Pressable onLongPress={Delete} style={{
                 backgroundColor: isMe ? '#0077ff' : ctx.scheme === 'light' ? 'white' : '#2b2b2b',
                 padding: 8,
-                borderRadius: 70,
-                borderBottomRightRadius: isMe ? 0 : 70,
-                borderTopLeftRadius: isMe ? 70 : 0,
+                borderRadius: 20,
+                borderBottomRightRadius: isMe ? 0 : 20,
+                borderTopLeftRadius: isMe ? 20 : 0,
                 paddingHorizontal: 10,
                 maxWidth: "80%",
                 borderColor: '#2c3e50',

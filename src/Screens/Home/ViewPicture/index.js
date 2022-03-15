@@ -150,6 +150,7 @@ export function ViewDetailedImage(props) {
             <SafeAreaView style={{ flex: 1 }}>
                 <View style={styles.container}>
                     <ImageViewer
+                    onSwipeDown={()=>nav.pop()}
                         imageUrls={images}
                         renderIndicator={() => null}
                     />

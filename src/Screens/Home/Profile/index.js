@@ -16,6 +16,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { reloadApp } from '../../../Components/ReloadApp'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Picker } from '@react-native-picker/picker';
+import { TranslateApi } from '../../../Components/Translate';
+
 
 const { width, height } = Dimensions.get('window')
 
@@ -97,23 +99,23 @@ export default function YourProfile() {
                                     margin: 5,
                                 }}>
                                     <IonIcons name='warning' color={'orange'} size={20} />
-                                    <RenderTextWithPlaceholder color={'orange'} string={ctx.language === 'English' ? "Your Phone Number isn't verified." : `የተመዘገቡበት ስልክ አልተረጋገጠም`} />
+                                    <RenderTextWithPlaceholder color={'orange'} string={TranslateApi({ str: "Your Phone Number isn't verified.", id: 37 })} />
                                     <Text style={{
                                         fontFamily: 'Poppins-Black',
                                         color: ctx.textColor,
                                         fontSize: 20,
                                     }}>
-                                        {ctx.language === 'English' ? "Verify" : `ላረጋገጥ`}
+                                        {TranslateApi({ str: "Verify", id: 36 })}
                                     </Text>
                                 </TouchableOpacity>
                             </View>}
                         <View>
-                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Full Name")} placeholder={ctx.language === 'English' ? "Full Name" : `ሙሉ ስም`} string={user.display_name} />
-                            <RenderTextWithPlaceholder onPress={() => alert("Usernames are not changeable.")} placeholder={ctx.language === 'English' ? "User name" : `የተጠቃሚ ስም`} string={user.username} />
-                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Bio")} placeholder={ctx.language === 'English' ? "Biography" : `አጭር ታሪክ`} string={user.bio ? user.bio : 'Add your Bio'} />
-                            <RenderTextWithPlaceholder onPress={() => alert("You can not change your Email at this moment.")} placeholder={ctx.language === 'English' ? "Email" : `ኢ-ሜል`} string={user.email} />
-                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Phone Number")} placeholder={ctx.language === 'English' ? "Phone Number" : `ስልክ ቁጥር`} string={user.phone_number} />
-                            <RenderTextWithPlaceholder onPress={() => alert("You can not update Country at this moment.")} placeholder={ctx.language === 'English' ? "Country" : `ሓግር`} string={user.country} />
+                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Full Name")} placeholder={ctx.language === 'Amharic' ? `ሙሉ ስም` : TranslateApi({ str: "Full Name", id: 16 })} string={user.display_name} />
+                            <RenderTextWithPlaceholder onPress={() => alert("Usernames are not changeable.")} placeholder={ctx.language === 'Amharic' ? `የተጠቃሚ ስም` : TranslateApi({ str: "User name", id: 17 })} string={user.username} />
+                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Bio")} placeholder={ctx.language === 'Amharic' ? `አጭር ታሪክ` : TranslateApi({ str: "Biography", id: 18 })} string={user.bio ? user.bio : 'Add your Bio'} />
+                            <RenderTextWithPlaceholder onPress={() => alert("You can not change your Email at this moment.")} placeholder={ctx.language === 'Amharic' ? `ኢ-ሜል` : TranslateApi({ str: "Email", id: 19 })}  string={user.email} />
+                            <RenderTextWithPlaceholder onPress={() => nav.push("Change Phone Number")} placeholder={ctx.language === 'Amharic' ? `ስልክ ቁጥር` : TranslateApi({ str: "Phone Number", id: 20 })} string={user.phone_number} />
+                            <RenderTextWithPlaceholder onPress={() => alert("You can not update Country at this moment.")} placeholder={ctx.language === 'Amharic' ? `ሀገር` : TranslateApi({ str: "Country", id: 21 })} string={user.country} />
                             {/* <RenderTextWithPlaceholder onPress={() => alert("You can not update Country code at this moment.")} placeholder={'Country Code'} string={user.country_code} /> */}
                             <Notifications />
                             <View>
@@ -122,7 +124,7 @@ export default function YourProfile() {
                                     fontFamily: 'Poppins-Bold',
                                     fontSize: 25,
                                     // textAlign: 'center'
-                                }}>{ctx.language === 'English' ? "Language" : `ቋንቋ`}</Text>
+                                }}>{ctx.language === 'Amharic' ? `ቋንቋ` : TranslateApi({ str: "Language", id: 15 }) }</Text>
 
                                 <Picker
                                     mode={`dropdown`}
@@ -132,12 +134,13 @@ export default function YourProfile() {
                                     selectedValue={ctx.language}
                                     onValueChange={(itemVal, itemIndex) => ctx.changeLan(itemVal)}
                                     style={{ fontFamily: `Poppins-Regular`, color: ctx.textColor, paddingHorizontal: 10, borderWidth: 1, borderColor: `#2c3e50`, borderRadius: 10 }}>
-                                    <Picker.Item {...ItemProps} label={`Amharic`} value={`Amharic`} />
-                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`Arabic`} value={`arabic`} />
+                                    <Picker.Item {...ItemProps} label={`አማርኛ`} value={`Amharic`} />
+                                    <Picker.Item {...ItemProps} label={`Afaan Oromoo`} value={`afan_oromo`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`عربي`} value={`arabic`} />
                                     <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`Swahili`} value={`swahili`} />
-                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`French`} value={`french`} />
-                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`Spanish`} value={`spanish`} />
-                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`Africaans`} value={`africaans`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`français`} value={`french`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`español`} value={`spanish`} />
+                                    <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`afrikaans`} value={`africaans`} />
                                     <Picker.Item {...ItemProps} fontFamily={`Poppins-Regular`} label={`English`} value={`english`} />
                                 </Picker>
                             </View>
@@ -148,7 +151,7 @@ export default function YourProfile() {
                                     fontFamily: 'Poppins-Light',
                                     color: ctx.textColor
                                 }}>
-                                    {ctx.language === 'English' ? "Logout" : `ልውጣ`}
+                                    {ctx.language === 'Amharic' ? `ልውጣ` : TranslateApi({ str: "Logout", id: 14 }) }
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -169,7 +172,7 @@ export default function YourProfile() {
                     <IonIcons name='arrow-back' color={'white'} size={25} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => (nav.push("View Profile", { user: user }))} style={{ backgroundColor: '#17171795', padding: 10, borderRadius: 100 }}>
-                    <Text style={{ color: 'white', fontFamily: 'Poppins-Black' }}>View Profile</Text>
+                    <Text style={{ color: 'white', fontFamily: 'Poppins-Black' }}>{TranslateApi({ str: "View Profile", id: 29 })}</Text>
                 </TouchableOpacity>
             </View>
         </>
@@ -347,7 +350,7 @@ function RenderTextWithPlaceholder(props) {
         }}>
             {placeholder && <Text style={{
                 fontSize: 13,
-                fontFamily: 'Poppins-Medium',
+                fontFamily: ctx.MediumFont,
                 color: color
             }}>
                 {placeholder}
@@ -369,14 +372,7 @@ function Notifications() {
     const [user, setUser] = useState([])
     const [msg, setMsg] = useState('')
     const [SnackBarOpacity, setSnackBarOpacity] = useState(0)
-    const MyAlert = (msg) => {
-        setMsg(msg)
-        setSnackBarOpacity(1)
-        setInterval(() => {
-            setSnackBarOpacity(0)
-            setMsg('')
-        }, 5000)
-    }
+
     useEffect(() => {
         const rcb = (e, r) => {
             setUser(JSON.parse(r))
@@ -412,14 +408,14 @@ function Notifications() {
                 fontFamily: 'Poppins-Bold',
                 fontSize: 25,
                 // textAlign: 'center'
-            }}>{ctx.language === 'English' ? "Notifications" : `ማሳወቂያዎች`}</Text>
-            <RenderStringWithSwitch type={'has_allowed_post_like_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "Likes" : `ላይኮች`} bool={user.has_allowed_post_like_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_reply_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "Replies" : `ምላሾች`} bool={user.has_allowed_reply_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_follow_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "New Followers" : `ኣዲስ ተከታዮች`} bool={user.has_allowed_follow_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_recommendation_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "Recommendations" : `ምክረ ሐሳቦች`} bool={user.has_allowed_recommendation_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_trending_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "Trends" : `አዝማሚያዎች`} bool={user.has_allowed_trending_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_new_chat_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "New Chats" : `ኣዲስ መልእክቶች`} bool={user.has_allowed_new_chat_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_new_post_from_following_notifs'} callback={callback} placeholder={ctx.language === 'English' ? "New Posts from following" : `ኣዲስ ቻቻዎች ከምከተላቸው ሰዎች`} bool={user.has_allowed_new_post_from_following_notifs} />
+            }}>{TranslateApi({ str: "Notifications", id: 27 })}</Text>
+            <RenderStringWithSwitch type={'has_allowed_post_like_notifs'} callback={callback} placeholder={ctx.language === 'Amharic' ? `መውደድ መግለጫዎች` : TranslateApi({ str: "Likes", id: 5 }) } bool={user.has_allowed_post_like_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_reply_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ምላሾች" : TranslateApi({ str: 'Reposts', id : 8 })} bool={user.has_allowed_reply_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_follow_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ኣዲስ ተከታዮች" : TranslateApi({ str: 'New Followers', id : 22 })} bool={user.has_allowed_follow_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_recommendation_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ምክረ ሐሳቦች" : TranslateApi({ str: 'Recommendations', id : 23 })} bool={user.has_allowed_recommendation_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_trending_notifs'} callback={callback} placeholder= { ctx.language === 'Amharic' ? "አዝማሚያዎች" : TranslateApi({ str: 'Trends', id : 24 })} bool={user.has_allowed_trending_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_new_chat_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ኣዲስ መልእክቶች" : TranslateApi({ str: 'New Chats', id : 25 })} bool={user.has_allowed_new_chat_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_new_post_from_following_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ኣዲስ ቻቻዎች ከምከተላቸው ሰዎች" : TranslateApi({ str: 'New Posts from following', id : 26 })} bool={user.has_allowed_new_post_from_following_notifs} />
             {msg ?
                 <View id="snackbar" style={{
                     opacity: SnackBarOpacity,
@@ -464,7 +460,7 @@ function RenderStringWithSwitch({ placeholder, bool, color_, callback, type }) {
         }}>
             <Text style={{
                 fontSize: 15,
-                fontFamily: 'Poppins-Medium',
+                fontFamily: ctx.MediumFont,
                 color: color,
                 width: '80%',
                 textAlign: 'left'
@@ -482,15 +478,7 @@ function RenderStringWithSwitch({ placeholder, bool, color_, callback, type }) {
 function SelectTheme() {
     const ctx = useContext(AppContext);
     const scheme = useColorScheme();
-    const callback = (enabled, type) => {
-        console.log(enabled, type)
-        if (type === 'High-Contrast') {
-            ctx.setScheme(enabled ? 'color-blind' : scheme)
-        }
-        if (type === 'dark-mode') {
-            ctx.setScheme(enabled ? 'dark' : 'light')
-        }
-    }
+
     return (
         <>
             <View style={{
@@ -501,7 +489,7 @@ function SelectTheme() {
                     fontFamily: 'Poppins-Bold',
                     fontSize: 25,
                     // textAlign: 'center'
-                }}>Theme</Text>
+                }}>{TranslateApi({ str: "Theme", id: 28 })}</Text>
                 <View>
                     <Picker
                         dropdownIconColor={ctx.textColor}
@@ -511,10 +499,10 @@ function SelectTheme() {
                         mode={`dropdown`}
                         onValueChange={(itemVal, itemIndex) => ctx.setScheme(itemVal)}
                         style={{ fontFamily: `Poppins-Regular`, color: ctx.textColor, paddingHorizontal: 10, borderWidth: 1, borderColor: `#2c3e50`, borderRadius: 10 }}>
-                        <Picker.Item style={{ fontFamily: `Poppins-Bold` }} fontFamily={`Poppins-Regular`} label={ctx.language === 'English' ? "Light Mode" : `ፈካ ያለ መልክ`} value={`light`} />
-                        <Picker.Item fontFamily={`Poppins-Regular`} label={ctx.language === 'English' ? "Dark Mode" : `ጨለም ያለ መልክ`} value={`dark`} />
-                        <Picker.Item fontFamily={`Poppins-Regular`} label={ctx.language === 'English' ? "Midnight Mode" : `ለሊት መልክ`} value={`ultra-dark`} />
-                        <Picker.Item fontFamily={`Poppins-Regular`} label={ctx.language === 'English' ? "High Contrast Mode" : `ጠንካራ ቀለሞች`} value={`color-blind`} />
+                        <Picker.Item fontFamily={`Poppins-Regular`} label={TranslateApi({ str: "Light Mode", id: 30 })} value={`light`} />
+                        <Picker.Item fontFamily={`Poppins-Regular`} label={TranslateApi({ str: "Dark Mode", id: 31 })} value={`dark`} />
+                        <Picker.Item fontFamily={`Poppins-Regular`} label={TranslateApi({ str: "Midnight Mode", id: 32 })} value={`ultra-dark`} />
+                        <Picker.Item fontFamily={`Poppins-Regular`} label={TranslateApi({ str: "High Contrast Mode", id: 33 })} value={`color-blind`} />
                     </Picker>
                     {/* <RenderStringWithSwitch type={'dark-mode'} callback={callback} placeholder={ctx.language === 'English' ? "Dark Mode" : `ጨለም ያለ ግጥ`} bool={ctx.scheme === 'dark'} />
                     <RenderStringWithSwitch type={'ultra-dark-mode'} callback={callback} placeholder={ctx.language === 'English' ? "Ultra Dark Mode" : `ለሊት ገጥ`} bool={ctx.scheme === 'ultra-dark-mode'} />

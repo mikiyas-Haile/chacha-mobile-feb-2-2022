@@ -14,6 +14,8 @@ import * as ImagePicker from 'expo-image-picker';
 import UploadImage from '../../../../Components/UploadImage'
 import Moment from 'moment';
 import { Audio } from 'expo-av';
+import { TranslateApi } from '../../../../Components/Translate'
+
 
 const { height, width } = Dimensions.get('window')
 
@@ -51,14 +53,12 @@ export default function ChatRoom(props) {
 
     async function Fetch(set) {
         if (Change === true) {
-            console.log("second Fetch initiated")
             const ucb = (e, r_) => {
                 setCurrentUser(r_)
                 const cb = (r, c) => {
                     if (c === 200)
                         setMessages(r)
                     // setMessages(r.results)
-                    console.log("second Fetch finished")
                     setHasSet(set ? set : false)
                 }
                 FetchLookup(cb, { endpoint: `/api/chat/${r_}-${otherUser}`, method: 'GET' })
@@ -67,29 +67,25 @@ export default function ChatRoom(props) {
         }
     }
     async function FirstFetch() {
-        console.log("First Fetch initiated")
         const ucb = (e, r_) => {
             setCurrentUser(r_)
             const cb = (r, c) => {
                 if (c === 200)
                     setMessages(r.results)
                 setChange(true)
-                console.log("First Fetch Successfully ended")
-                console.log("Changed")
             }
             FetchLookup(cb, { endpoint: `/api/chat/${r_}-${otherUser}/get`, method: 'GET' })
         }
         AsyncStorage.getItem("current_user_username", ucb)
     }
     useEffect(() => {
-        console.log("First use Effect")
         FirstFetch()
 
         return () => {
-            // setMessages([])
-            // setHasSet(false)
-            // setChange(false)
-            // setImage([])
+            setMessages([])
+            setHasSet(false)
+            setChange(false)
+            setImage([])
         }
     }, [])
     useEffect(() => {
@@ -141,9 +137,10 @@ export default function ChatRoom(props) {
         return () => clearInterval(timer);
     }, [HasSet])
     const renderRow = ({ item, index }) => {
+        let sow = true;
         return (
             <>
-                <RoomMessageCard currentUser={currentUser} item={item} key={`${index}`} />
+                <RoomMessageCard sow={sow} currentUser={currentUser} item={item} key={`${index}`} />
             </>
         )
     }
@@ -308,11 +305,13 @@ export default function ChatRoom(props) {
                         }}>
                             <EvilIcons name='envelope' color={ctx.textColor} size={width / 4} />
                             <Text style={{
-                                fontFamily: 'Poppins-Regular',
+                                fontFamily: ctx.RegularFont,
                                 textAlign: 'center',
                                 fontSize: 13,
                                 color: ctx.textColor,
-                            }} >{ctx.language === 'English' ? `Messages with @${otherUser} will appear here.` : `ከ @${otherUser} ጋር ያሎት ንግግር እዚህ ይታያል`}</Text>
+                            }}>
+                                {TranslateApi({ str: `Messages with`, id: 34 })} @{otherUser} {TranslateApi({ str: `will appear here`, id: 35 })}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </>}
@@ -361,10 +360,10 @@ export default function ChatRoom(props) {
                         borderColor: '#2c3e5050',
                         fontFamily: 'Poppins-Regular',
                         color: ctx.textColor,
-                        width: '70%',
+                        width: '55%',
                         marginRight: 5,
-                        borderWidth: 1
-                    }} multiline onChangeText={setBody} placeholder='What are you thinking about?' placeholderTextColor={'grey'} >
+                        borderWidth: 1,
+                    }} multiline onChangeText={setBody} placeholder='Send Message...' placeholderTextColor={'grey'} >
                     {body.split(/(\s+)/).map((item, index) => {
                         return (
                             <Text key={index}
@@ -423,7 +422,7 @@ export default function ChatRoom(props) {
 
 }
 function RoomMessageCard(props) {
-    const { item, currentUser } = props;
+    const { item, currentUser, sow } = props;
     const ctx = useContext(AppContext);
     const nav = useNavigation();
     const Delete = () => {
@@ -463,16 +462,18 @@ function RoomMessageCard(props) {
             {/* <Image style={{ position: '', height: 15, width: 15, borderRadius: 100 }} source={{ uri: item.sender.pfp }} /> */}
             <Pressable onLongPress={Delete} style={{
                 backgroundColor: isMe ? '#0077ff' : ctx.scheme === 'light' ? 'white' : '#2b2b2b',
-                padding: 8,
+                padding: 5,
                 borderRadius: 20,
-                borderBottomRightRadius: isMe ? 0 : 20,
-                borderTopLeftRadius: isMe ? 20 : 0,
-                paddingHorizontal: 10,
+                // borderBottomRightRadius: sow ? isMe ? 0 : 50 : 50,
+                // borderTopLeftRadius: sow ? isMe ? 50 : 0 : 50,
+                paddingHorizontal: 15,
                 maxWidth: "80%",
                 borderColor: '#2c3e50',
                 textAlign: 'left',
                 alignSelf: isMe ? "flex-end" : 'flex-start',
-                marginVertical: 2
+                marginVertical: .2,
+                marginHorizontal: 5,
+                position: 'relative'
             }}>
                 <View style={{
                     margin: 1,
@@ -515,7 +516,6 @@ function RoomMessageCard(props) {
                                     })}
                                 </> : null}
                             </Text>
-
                         </>
                     }
                 </View>
@@ -535,21 +535,72 @@ function RoomMessageCard(props) {
                     color: textColor,
                     fontSize: 10,
                     fontFamily: 'Poppins-Light',
-                    alignSelf: isMe ? "flex-end" : 'flex-start',
+                    alignSelf: isMe ? 'flex-end' : 'flex-start',
                     // paddingHorizontal: 10
                 }}>
                     {DateAdded(item.date_added)}
                 </Text>
+                {isMe && <Bubble ctx={ctx} isMe={isMe} />}
+                {isMe ? null :
+                <>
+                <View style={{
+                    position: "absolute",
+                    backgroundColor: isMe ? '#0077ff' : ctx.scheme === 'light' ? 'white' : '#2b2b2b',
+                    width: 20,
+                    height: 25,
+                    bottom: 0,
+                    borderBottomRightRadius: 25,
+                    left: -10
+                }}>
+
+                </View>
+                <View style={{
+                    position: "absolute",
+                    backgroundColor: ctx.bgColor,
+                    //backgroundColor:"green",
+                    width: 20,
+                    height: 35,
+                    bottom: -6,
+                    borderBottomRightRadius: 18,
+                    left: -20
+                }}></View>
+                </>
+}
             </Pressable>
+
         </>
     )
 }
 export function DateAdded(str) {
     try {
-        var dateCalender = str.split("T")[0]
-        var time = str.split("T")[1].split(".")[0]
-        return Moment(str).fromNow()
+        return `${Moment(str).fromNow(true).split(' ')[0].replace("a", '1')} ${Moment(str).fromNow(true).split(' ')[1].split("")[0]}`
     } catch (e) {
         return ''
     }
+
+}
+
+function Bubble({ isMe, ctx }) {
+    return (<>
+        <View style={{
+            position: "absolute",
+            backgroundColor: isMe ? '#0077ff' : ctx.scheme === 'light' ? 'white' : '#2b2b2b',
+            width: 25,
+            height: 25,
+            bottom: 0,
+            borderBottomLeftRadius: 25,
+            right: isMe ? -10 : 0
+        }}></View>
+
+        <View style={{
+            position: "absolute",
+            backgroundColor: ctx.bgColor,
+            //backgroundColor:"green",
+            width: 20,
+            height: 35,
+            bottom: -6,
+            borderBottomLeftRadius: 18,
+            right: -20,
+            zIndex: 1
+        }}></View></>);
 }

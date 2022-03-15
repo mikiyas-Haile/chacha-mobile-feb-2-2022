@@ -164,6 +164,18 @@ function FontsHandlerApp() {
     'Caviar': {
       uri: require('./assets/fonts/Caviar-Dreams/CaviarDreams.ttf'),
     },
+    'NotoSerifEthiopic-Black' : {
+      uri: require('./assets/fonts/NotoSerifEthiopic/NotoSerifEthiopic-Black.ttf')
+    },
+    'NotoSerifEthiopic-Medium' : {
+      uri: require('./assets/fonts/NotoSerifEthiopic/NotoSerifEthiopic-Medium.ttf')
+    },
+    'NotoSerifEthiopic-Light' : {
+      uri: require('./assets/fonts/NotoSerifEthiopic/NotoSerifEthiopic-Light.ttf')
+    },
+    'NotoSerifEthiopic-Regular' : {
+      uri: require('./assets/fonts/NotoSerifEthiopic/NotoSerifEthiopic-Regular.ttf')
+    },
   })
   if (loaded) {
     return (

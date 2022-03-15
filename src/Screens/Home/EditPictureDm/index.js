@@ -9,50 +9,16 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import Feather from 'react-native-vector-icons/Feather'
 import Foundation from 'react-native-vector-icons/Foundation'
 import ImageViewer from 'react-native-image-zoom-viewer';
-import Swiper from 'react-native-swiper'
+import ChooseFont from './ChooseFonts';
+import { FONTS } from './Fonts'
+import { Animated } from 'react-native'
+import PinchZoomView from 'react-native-pinch-zoom-view';
+import { PinchGestureHandler, State } from 'react-native-gesture-handler'
+import ImageZoom from 'react-native-image-pan-zoom';
+
+
 
 const { height, width } = Dimensions.get('window')
-
-const FONTS = [
-    {
-        name: 'Poppins-ExtraLight',
-        bgColor: `#0d0d0d99`,
-        textColor: `white`
-    },
-    {
-        name: `Poppins-Bold`,
-        bgColor: `yellow`,
-        textColor: `black`,
-        padding: 15,
-        borderRadius: 1,
-        doesntNeedBg: true
-    },
-    {
-        name: `Poppins-Black`,
-        glowColor: `black`,
-        allCaps: true,
-    },
-    {
-        name: 'Poppins-ExtraLight',
-        glowColor: `black`
-    },
-    {
-        name: 'Caviar-Italic',
-    },
-    {
-        name: 'Caviar-Italic',
-        glowColor: `#fe2c55`
-    },
-    {
-        name: 'Cursive',
-        glowColor: `black`,
-        allLower: true
-    },
-    {
-        name: 'Cursive',
-        glowColor: `#fe2c55`
-    },
-]
 
 export default function EditPictureForDm(props) {
     const { uri, file } = props?.route?.params;
@@ -79,6 +45,8 @@ export default function EditPictureForDm(props) {
     const fontSize = 21
     const [InputRef, setInputRef] = useState(null);
     const [selectFont, setSelectFont] = useState(0)
+    const [Texts, setTexts] = useState([]);
+
     useEffect(() => {
         return () => {
             // setbody('');
@@ -103,29 +71,7 @@ export default function EditPictureForDm(props) {
                     backgroundColor: '#17171795',
                     justifyContent: 'center'
                 }}>
-                    <View style={{ opacity: selectFont, height: 100, marginBottom: 20, marginTop: `auto` }}>
-                        <Swiper activeDotColor='#fe2c55'>
-                            {FONTS.map((item, index) => {
-                                return (
-                                    <TouchableOpacity key={index} onPress={() => setFontStyle(item)}>
-                                        <Text numberOfLines={1} ellipsizeMode={`tail`} style={{
-                                            backgroundColor: item.bgColor ? item.bgColor : `transparent`,
-                                            color: item.textColor ? item.textColor : `white`,
-                                            fontFamily: item.name,
-                                            textAlign: textAlign,
-                                            fontSize: fontSize,
-                                            textShadowColor: item.glowColor ? item.glowColor : 'rgba(0, 0, 0, 0)',
-                                            textShadowOffset: { width: -1, height: 1 },
-                                            textShadowRadius: 15,
-                                            borderRadius: item.borderRadius ? item.borderRadius : 5,
-                                            padding: item.padding ? item.padding : 5,
-                                            textTransform: item.allCaps ? `uppercase` : item.allLower ? `lowercase` : `none`
-                                        }}>Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz</Text>
-                                    </TouchableOpacity>
-                                )
-                            })}
-                        </Swiper>
-                    </View>
+                    <ChooseFont selectFont={selectFont} fontSize={fontSize} textAlign={textAlign} setFontStyle={setFontStyle} />
                     <TextInput ref={setInputRef} autoFocus={AddingText} focus={AddingText} multiline onChangeText={setbody} placeholderTextColor={FontStyle.textColor ? FontStyle.textColor : `white`} placeholder='' style={{
                         color: FontStyle.textColor ? FontStyle.textColor : `white`,
                         fontFamily: FontStyle.name,
@@ -215,50 +161,39 @@ function Editor(props) {
                 uri,
         },
     ]
+
     return (
         <>
-            <ViewShot ref={viewShot} options={{ format: "jpg", quality: 0.9 }}>
-                <ImageBackground blurRadius={2000} style={{ height: '100%', width: '100%', backgroundColor: 'black' }} source={{ uri: uri }}>
-                    <SafeAreaView style={{ flex: 1 }}>
-                        <View style={{
-                            backgroundColor: '#F5FCFF',
-                            flex: 1,
-                        }}>
-                            <ImageViewer
-                                imageUrls={images}
-                                renderIndicator={() => null} />
-                            {body ?
-                                <Draggable onReverse={() => console.log(`reveresed..`)} x={100} y={300}>
-                                    <TouchableOpacity onPress={() => setAddingText(true)} style={{
-                                        maxWidth: '80%',
-                                    }}>
-                                        <Text style={{
-                                            backgroundColor: !FontStyle.doesntNeedBg ? FontStyle.bgColor : `transparent`,
-                                            fontFamily: FontStyle.name ? FontStyle.name : FONTS[0].name,
-                                            fontSize: fontSize,
-                                            // marginTop: `auto`
-                                        }}>
-                                            <Text style={{
-                                                // maxWidth: '80%',
-                                                backgroundColor: FontStyle.doesntNeedBg ? FontStyle.bgColor : `transparent`,
-                                                color: FontStyle.textColor ? FontStyle.textColor : `white`,
-                                                fontFamily: FontStyle.name ? FontStyle.name : FONTS[0].name,
-                                                textAlign: textAlign,
-                                                padding: FontStyle.padding ? FontStyle.padding : 5,
-                                                fontSize: fontSize,
-                                                textShadowColor: FontStyle.glowColor ? FontStyle.glowColor : 'rgba(0, 0, 0, 0)',
-                                                textShadowOffset: { width: -1, height: 1 },
-                                                textShadowRadius: 15
-                                            }}>
-                                                {body}
-                                            </Text>
-                                        </Text>
-                                    </TouchableOpacity>
-                                </Draggable> : null}
-                            {/* </ImageViewer> */}
-                        </View>
-                    </SafeAreaView>
-                </ImageBackground>
+            <ViewShot ref={viewShot} style={{ backgroundColor: ctx.bgColor }} options={{ format: "jpg", quality: 0.9 }}>
+                <ImageZoom cropWidth={width}
+                    cropHeight={height} imageWidth={width}
+                    imageHeight={height}>
+                    <Image style={{ flex: 1, backgroundColor: ctx.bgColor }}
+                        source={{ uri: uri }} />
+                    {body ?
+                        <Draggable onReverse={() => console.log(`reveresed..`)} x={100} y={300}>
+                            {/* <PinchZoomView> */}
+                            <TouchableOpacity onPress={() => setAddingText(true)} style={{
+                                maxWidth: '80%',
+                            }}>
+                                <Text style={{
+                                    backgroundColor: !FontStyle.doesntNeedBg ? FontStyle.bgColor : `transparent`,
+                                    color: FontStyle.textColor ? FontStyle.textColor : `white`,
+                                    fontFamily: FontStyle.name ? FontStyle.name : FONTS[0].name,
+                                    textAlign: textAlign,
+                                    padding: FontStyle.padding ? FontStyle.padding : 5,
+                                    fontSize: fontSize,
+                                    textShadowColor: FontStyle.glowColor ? FontStyle.glowColor : 'rgba(0, 0, 0, 0)',
+                                    textShadowOffset: { width: -1, height: 1 },
+                                    textShadowRadius: 15
+                                }}>
+                                    {body}
+                                </Text>
+                            </TouchableOpacity>
+                            {/* </PinchZoomView> */}
+                        </Draggable>
+                        : null}
+                </ImageZoom>
             </ViewShot>
             <View style={{
                 backgroundColor: `#00000080`,
@@ -295,40 +230,60 @@ function Editor(props) {
     )
 }
 
-                    // {/* <ImageBackground resizeMode='contain' style={{ height: '100%', width: '100%' }} source={{ uri: uri }}>
-                    //     {body ?
-                    //         <Draggable x={100} y={300}>
-                    //             <TouchableOpacity onPress={() => setAddingText(true)} style={{
-                    //                 maxWidth: '80%',
-                    //             }}>
-                    //                 <Text style={{
-                    //                     color: FontStyle.textColor ? FontStyle.textColor : `white`,
-                    //                     fontFamily: FontStyle.name,
-                    //                     textAlign: textAlign,
-                    //                     fontSize: fontSize,
-                    //                     borderRadius: FontStyle.borderRadius ? FontStyle.borderRadius : 5,
-                    //                     textShadowColor: FontStyle.glowColor ? FontStyle.glowColor : 'rgba(0, 0, 0, 0)',
-                    //                     textShadowOffset: { width: -1, height: 1 },
-                    //                     textShadowRadius: 15,
-                    //                     backgroundColor: !FontStyle.doesntNeedBg ? FontStyle.bgColor : `transparent`,
-                    //                     padding: FontStyle.padding ? FontStyle.padding : 5,
-                    //                     // marginTop: `auto`
-                    //                 }}>
-                    //                     <Text style={{
-                    //                         // maxWidth: '80%',
-                    //                         backgroundColor: FontStyle.doesntNeedBg ? FontStyle.bgColor : `transparent`,
-                    //                         color: FontStyle.textColor ? FontStyle.textColor : `white`,
-                    //                         fontFamily: FontStyle.name,
-                    //                         textAlign: textAlign,
-                    //                         padding: FontStyle.padding ? FontStyle.padding : 5,
-                    //                         fontSize: fontSize,
-                    //                         textShadowColor: FontStyle.glowColor ? FontStyle.glowColor : 'rgba(0, 0, 0, 0)',
-                    //                         textShadowOffset: { width: -1, height: 1 },
-                    //                         textShadowRadius: 15
-                    //                     }}>
-                    //                         {body}
-                    //                     </Text>
-                    //                 </Text>
-                    //             </TouchableOpacity>
-                    //         </Draggable> : null}
-                    // </ImageBackground> */}
+// <ImageBackground blurRadius={2000} style={{ height: '100%', width: '100%', backgroundColor: 'black' }} source={{ uri: uri }}>
+//     <SafeAreaView style={{ flex: 1 }}>
+//         <View style={{
+//             backgroundColor: '#F5FCFF',
+//             flex: 1,
+//         }}>
+//             <ImageViewer
+//                 imageUrls={images}
+//                 renderIndicator={() => null}>
+
+//             </ImageViewer>
+//             <ImageViewer
+//                 renderImage={() => (
+//                     <View style={{ position: 'absolute', flex: 1 }}>
+//                         {body ?
+//                             <Draggable onReverse={() => console.log(`reveresed..`)} x={100} y={300}>
+//                                 {/* <PinchZoomView> */}
+//                                 <TouchableOpacity onPress={() => setAddingText(true)} style={{
+//                                     maxWidth: '80%',
+//                                 }}>
+//                                     <Text style={{
+//                                         backgroundColor: !FontStyle.doesntNeedBg ? FontStyle.bgColor : `transparent`,
+//                                         color: FontStyle.textColor ? FontStyle.textColor : `white`,
+//                                         fontFamily: FontStyle.name ? FontStyle.name : FONTS[0].name,
+//                                         textAlign: textAlign,
+//                                         padding: FontStyle.padding ? FontStyle.padding : 5,
+//                                         fontSize: fontSize,
+//                                         textShadowColor: FontStyle.glowColor ? FontStyle.glowColor : 'rgba(0, 0, 0, 0)',
+//                                         textShadowOffset: { width: -1, height: 1 },
+//                                         textShadowRadius: 15
+//                                     }}>
+//                                         {body}
+//                                     </Text>
+//                                 </TouchableOpacity>
+//                                 {/* </PinchZoomView> */}
+//                             </Draggable>
+//                             : null}</View>
+//                 )}
+//                 renderIndicator={() => null}>
+//             </ImageViewer>
+//         </View>
+//     </SafeAreaView>
+// </ImageBackground>
+
+const PinchableBox = ({ imageUri }) => {
+    return (
+        <Animated.Image
+            source={{ uri: imageUri }}
+            style={{
+                width: screen.width,
+                height: 300,
+                transform: [{ scale: 1 }]
+            }}
+            resizeMode='contain'
+        />
+    )
+}

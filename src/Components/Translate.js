@@ -6,20 +6,28 @@ import { TranslateSw } from './Languages/Swahili'
 import { TranslateFrench } from './Languages/French'
 import { TranslateSpanish } from './Languages/Spanish'
 import { TranslateAfricaans } from './Languages/Africaans'
-import { SlideOutLeft } from 'react-native-reanimated';
+import { TranslateAmharic } from './Languages/Amharic'
+import { TranslateAfaanOromo } from './Languages/AfaanOromo'
 import { useContext } from 'react'
 import { AppContext } from '../../AppContext'
 
+// export function NormalTranslateApi({ str, id }) {
 export function TranslateApi({ str, id }) {
     const ctx = useContext(AppContext);
     const lan = ctx.language
-    console.log("======================================")
-    console.log("LANGUAGE: ", lan)
-    console.log("WORD: ", str)
-    console.log("======================================")
+    // console.log("======================================")
+    // console.log("LANGUAGE: ", lan)
+    // console.log("WORD: ", str)
+    // console.log("======================================")
 
     if (lan === 'english') {
         return str
+    }
+    else if  (lan === 'afan_oromo') {
+        return TranslateAfaanOromo(str, id)
+    }
+    else if (lan === 'Amharic') {
+        return TranslateAmharic(str, id)
     }
     else if (lan === 'swahili') {
         return TranslateSw(str, id)

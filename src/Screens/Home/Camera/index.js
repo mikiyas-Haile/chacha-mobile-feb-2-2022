@@ -14,6 +14,7 @@ import UploadImage from '../../../Components/UploadImage'
 import Swiper from 'react-native-swiper'
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TranslateApi } from '../../../Components/Translate'
 
 const { width, height } = Dimensions.get("screen")
 const screenRatio = height / width;
@@ -102,11 +103,11 @@ export default function AddScreen() {
                         }}>
                             <IonIcons name='ios-image' color={ctx.textColor} size={width / 4} />
                             <Text style={{
-                                fontFamily: 'Poppins-Regular',
+                                fontFamily: ctx.RegularFont,
                                 textAlign: 'center',
                                 fontSize: 13,
                                 color: ctx.textColor,
-                            }} >{ctx.language === 'English' ? 'View all pictures from my gallery' : 'ሁሉንም ፎቶዎቼን ልምልክት'}</Text>
+                            }}>{ctx.language === 'Amharic' ? 'ሁሉንም ፎቶዎቼን ልምልክት' : TranslateApi({str: "View all pictures from my gallery", id: 10})}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -126,11 +127,11 @@ export default function AddScreen() {
                             textAlign: 'left',
                             // borderRadius: 30,
                             borderColor: '#2c3e50',
-                            fontFamily: 'Poppins-Regular',
+                            fontFamily: ctx.RegularFont,
                             color: ctx.textColor,
                             width: '80%',
                             marginRight: 5
-                        }} multiline onChangeText={setBody} placeholder={ctx.language === 'English' ? 'Make a quick post' : 'ፈጣን ቻቻ ላድርግ'} placeholderTextColor={'grey'} >
+                        }} multiline onChangeText={setBody} placeholder={ctx.language === 'Amharic' ? 'ፈጣን ቻቻ ላድርግ' : TranslateApi({str: "Make a quick Post", id: 2})} placeholderTextColor={'grey'} >
                         {body.split(/(\s+)/).map((item, index) => {
                             return (
                                 <Text key={index}
@@ -172,7 +173,7 @@ export default function AddScreen() {
                             color: ctx.bgColor,
                             fontFamily: 'Poppins-Bold',
                             fontSize: 20
-                        }}>{ctx.language === 'English' ? 'Continue' : 'ቀጥል'}</Text></TouchableOpacity>}
+                        }}>{ctx.language === 'Amharic' ? 'ቀጥል' : TranslateApi({str: "Continue", id: 11})}</Text></TouchableOpacity>}
             </View>
         </>
     )
@@ -341,12 +342,12 @@ export function PublishPicture(props) {
             setBody('')
             ctx.setScreenIsLoading(false)
             if (c === 201) {
-                ctx.MyAlert(ctx.language === 'English' ? 'Post was made successfully' : 'ቻቻዎ በስኬት ተለቋል')
+                ctx.MyAlert('Post was made successfully')
                 setBody(body)
                 nav.push("Home")
                 setPublishing(0)
             } else {
-                MyAlert(ctx.language === 'English' ? 'There was an error trying to make post Please try again' : 'ቻቻዎ ለመላክ ኣልተቻለም እባኮን ደግመው ሞክሩ')
+                ctx.MyAlert('There was an error trying to make post Please try again')
             }
         }
         MainLookup(cb, {
@@ -427,7 +428,7 @@ export function PublishPicture(props) {
                             color: ctx.textColor,
                             width: '90%',
                             marginRight: 5
-                        }} multiline onChangeText={setBody} placeholder={ctx.language === 'English' ? 'What are you thinking about?' : 'ሀሳቦትን ያጋሩ፡  ምን እያሰቡ ነው?'} placeholderTextColor={'grey'} >
+                        }} multiline onChangeText={setBody} placeholder={ctx.language === 'Amharic' ? 'ሀሳቦትን ያጋሩ፡  ምን እያሰቡ ነው?' : TranslateApi({ str: 'What are you thinking about', id: 12 })} placeholderTextColor={'grey'} >
                         {body.split(/(\s+)/).map((item, index) => {
                             return (
                                 <Text key={index}

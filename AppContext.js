@@ -7,7 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as Progress from 'react-native-progress';
 import UploadImage from "./src/Components/UploadImage";
 import { host } from "./src/Components/host";
-import  Animated, { FadeIn, Layout, ZoomIn, ZoomOut } from 'react-native-reanimated'
+import Animated, { FadeIn, Layout, ZoomIn, ZoomOut } from 'react-native-reanimated'
 
 const { width, height } = Dimensions.get("window")
 
@@ -44,10 +44,6 @@ export function AppProvider({ children }) {
       setToken(r)
     }
     AsyncStorage.getItem("session_token", cb)
-    const ucb = (e, r) => {
-      setCurrentUser(r)
-    }
-    AsyncStorage.getItem("current_user_username", ucb)
   }, [])
   const GetUser = () => {
     const cb = (r, c) => {
@@ -95,6 +91,13 @@ export function AppProvider({ children }) {
   const changeLan = (lan) => {
     setLanguage(lan)
     AsyncStorage.setItem('lang', lan)
+    const cb = (r, c) => {
+      if (c == 200) {
+        setRequestUser(r)
+        setCurrentUser(r)
+      }
+    }
+    MainLookup(cb, { endpoint: `/api/user/language/${lan}`, method: 'GET' })
   }
   const [CSRFToken, setCSRFTOKEN] = useState()
   // FETCH CSRFTOKEN
@@ -120,10 +123,10 @@ export function AppProvider({ children }) {
     MyAlert("Your post will appear shortly.")
     setScreenIsLoading(true)
     const PictureUploadedHandlers = (r_, c_) => {
-      console.log(r_,c_)
+      console.log(r_, c_)
       if (c_ === 201) {
         const cb = (r, c) => {
-          setCurrentUser(r.author.username)
+          setCurrentUser(r)
           AsyncStorage.setItem('current_user_username', r.author.username)
           AsyncStorage.setItem('current_user_email', r.author.email)
           setScreenIsLoading(false)
@@ -149,7 +152,7 @@ export function AppProvider({ children }) {
     const cb = (r, c) => {
       setScreenIsLoading(false)
       if (c === 201) {
-        setCurrentUser(r.username)
+        setCurrentUser(r)
         AsyncStorage.setItem('current_user_username', r.username)
         AsyncStorage.setItem('current_user_email', r.email)
         // MyAlert('Post was made successfully')
@@ -185,7 +188,7 @@ export function AppProvider({ children }) {
   const Post = (body, callback) => {
     const cb = (r, c) => {
       callback(r, c)
-      setCurrentUser(r.author.username)
+      setCurrentUser(r)
       AsyncStorage.setItem('current_user_username', r.author.username)
       AsyncStorage.setItem('current_user_email', r.author.email)
       setScreenIsLoading(false)
@@ -201,9 +204,27 @@ export function AppProvider({ children }) {
       }, method: 'POST', csrf: CSRFToken
     })
   }
+  const [RegularFont, setRegularFont] = useState(language === 'Amharic' ? 'NotoSerifEthiopic-Regular' : 'Poppins-Regular')
+  const [BoldFont, setBoldFont] = useState(language === 'Amharic' ? 'NotoSerifEthiopic-Bold' : 'Poppins-Bold')
+  const [BlackFont, setBlackFont] = useState(language === 'Amharic' ? 'NotoSerifEthiopic-Black' : 'Poppins-Black')
+  const [MediumFont, setMediumFont] = useState(language === 'Amharic' ? 'NotoSerifEthiopic-Medium' : 'Poppins-Medium')
+  const [LightFont, setLightFont] = useState(language === 'Amharic' ? 'NotoSerifEthiopic-Light' : 'Poppins-Light')
+  useEffect(() => {
+    setRegularFont(language === 'Amharic' ? 'NotoSerifEthiopic-Regular' : 'Poppins-Regular')
+    setBoldFont(language === 'Amharic' ? 'NotoSerifEthiopic-Bold' : 'Poppins-Bold')
+    setBlackFont(language === 'Amharic' ? 'NotoSerifEthiopic-Black' : 'Poppins-Black')
+    setMediumFont(language === 'Amharic' ? 'NotoSerifEthiopic-Medium' : 'Poppins-Medium')
+    setLightFont(language === 'Amharic' ? 'NotoSerifEthiopic-Light' : 'Poppins-Light')
+  },[language])
   return (
     <AppContext.Provider
       value={{
+        LightFont,
+        BoldFont,
+        BlackFont,
+        MediumFont,
+        RegularFont,
+        setRegularFont,
         GetUser,
         MyAlert,
         Post,
@@ -226,26 +247,26 @@ export function AppProvider({ children }) {
       }}>
       {ScreenIsLoading && <Progress.Bar color={'#fe2c55'} indeterminate={ScreenIsLoading} progress={.5} width={width} />}
       {children}
-      {msg ? 
-      <Animated.View layout={Layout.delay(100)} exiting={ZoomOut} entering={ZoomIn} id="snackbar"
-        style={{
-          // opacity: SnackBarOpacity,
-          backgroundColor: '#333',
-          textAlign: 'center',
-          borderRadius: 10,
-          padding: 10,
-          position: 'absolute',
-          bottom: 20,
-          alignItems: 'center',
-          justifyContent: 'center',
-          alignSelf: 'center',
-        }}>
-        <Text style={{
-          fontSize: 15,
-          textAlign: 'center',
-          color: 'white',
-          fontFamily: 'Poppins-Regular'
-        }}>{msg}</Text></Animated.View> 
+      {msg ?
+        <Animated.View layout={Layout.delay(100)} exiting={ZoomOut} entering={ZoomIn} id="snackbar"
+          style={{
+            // opacity: SnackBarOpacity,
+            backgroundColor: '#333',
+            textAlign: 'center',
+            borderRadius: 10,
+            padding: 10,
+            position: 'absolute',
+            bottom: 20,
+            alignItems: 'center',
+            justifyContent: 'center',
+            alignSelf: 'center',
+          }}>
+          <Text style={{
+            fontSize: 15,
+            textAlign: 'center',
+            color: 'white',
+            fontFamily: 'Poppins-Regular'
+          }}>{msg}</Text></Animated.View>
         : null}
     </AppContext.Provider>
   );

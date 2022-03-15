@@ -13,7 +13,6 @@ import { useNavigation } from "@react-navigation/native";
 const { width, height } = Dimensions.get('window')
 
 const ICONSIZE = 23
-const FONT_WEIGHT = 'Poppins-Light'
 const FONT_SIZE = 13
 
 
@@ -82,7 +81,7 @@ export default function ActionBtns(props) {
         // window.location.href = `/${item.author.username}/${item.id}/reply`
         nav.push('Reply to Post', { username: username, id: id })
     }
-
+    const FONT_WEIGHT = ctx.LightFont
     return (
         <>
             <View style={{ flexDirection: 'row' }}>

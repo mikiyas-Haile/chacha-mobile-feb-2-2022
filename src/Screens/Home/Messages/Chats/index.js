@@ -10,7 +10,8 @@ import * as Contacts from 'expo-contacts';
 import { host } from '../../../../Components/host'
 import { WebView } from 'react-native-webview';
 import * as ImagePicker from 'expo-image-picker';
-import DateAdded from '../../../../Components/DateAdded'
+import { DateAdded } from '../ChatRoom'
+import { TranslateApi } from '../../../../Components/Translate'
 
 
 const { height, width } = Dimensions.get('window')
@@ -70,11 +71,11 @@ function Chats() {
                     }}>
                         <EvilIcons name='envelope' color={ctx.textColor} size={width / 4} />
                         <Text style={{
-                            fontFamily: 'Poppins-Regular',
+                            fontFamily: ctx.RegularFont,
                             textAlign: 'center',
                             fontSize: 13,
                             color: ctx.textColor,
-                        }} >{ctx.language === 'English' ? `All of your chats will appear here. ` : `ሁሉም መልእቶ እዚህ ይታያል`}</Text>
+                        }} >{ctx.language === 'Amharic' ? `ሁሉም መልእቶ እዚህ ይታያል` : TranslateApi({str: "All of your chats will appear here", id: 13})}</Text>
                     </TouchableOpacity>
                 </View>
             </> :

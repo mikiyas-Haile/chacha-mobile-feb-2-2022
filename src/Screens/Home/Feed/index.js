@@ -13,7 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import { host } from '../../../Components/host'
 import DateAdded, { SecondaryDateAdded } from '../../../Components/DateAdded'
 import { TranslateApi } from '../../../Components/Translate'
-import  Animated, { FadeIn, Layout, ZoomIn, ZoomOut, SlideInUp, SlideOutUp } from 'react-native-reanimated'
+import Animated, { FadeIn, Layout, ZoomIn, ZoomOut, SlideInUp, SlideOutUp } from 'react-native-reanimated'
 
 
 const { width, height } = Dimensions.get('window')
@@ -87,7 +87,6 @@ export default function FeedScreen() {
             ctx.Post(body, callback)
         }
     }
-    const listRef = React.useRef()
     const [offset, setoffset] = useState(0)
     const [showInput, setShowInput] = useState(true)
 
@@ -96,14 +95,20 @@ export default function FeedScreen() {
             flex: 1,
             backgroundColor: ctx.bgColor,
         }}>
-            {showInput && <MakeAQuickPostRenderer ref={listRef} setBody={setBody} TranslateApi={TranslateApi} Post={Post} body={body} />}
+            {showInput && <MakeAQuickPostRenderer setBody={setBody} TranslateApi={TranslateApi} Post={Post} body={body} />}
 
             <FlatList
+                ListHeaderComponent={() => (
+                    <>
+                        {!showInput && <View style={{ width: '100%', height: 60, backgroundColor: ctx.bgColor }} />}
+                    </>
+
+                )}
                 onScroll={(event) => {
                     var currentOffset = event.nativeEvent.contentOffset.y;
                     var direction = currentOffset > offset ? 'down' : 'up';
                     setoffset(currentOffset);
-                    if (direction === 'down'){
+                    if (direction === 'down') {
                         setShowInput(false)
                     } else {
                         setShowInput(true)
@@ -129,11 +134,11 @@ export default function FeedScreen() {
                         }}>
                             <Ionicons name='add-circle-outline' color={ctx.textColor} size={width / 4} />
                             <Text style={{
-                                fontFamily: 'Poppins-Regular',
+                                fontFamily: ctx.RegularFont,
                                 textAlign: 'center',
                                 fontSize: 13,
                                 color: ctx.textColor,
-                            }} >{ctx.language === 'Amharic' ? 'የወዳጅ ቻቻዎች እዚህ ይታያሉ' : TranslateApi({str: "Posts from friends will appear here", id:  0})}</Text>
+                            }} >{ctx.language === 'Amharic' ? 'የወዳጅ ቻቻዎች እዚህ ይታያሉ' : TranslateApi({ str: "Posts from friends will appear here", id: 0 })}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -199,11 +204,11 @@ export function PostCard(props) {
             if (c === 201 || c === 200) {
                 setLikess(r.likes.length)
                 setSecondaryItem(r)
-                ctx.MyAlert(ctx.language === 'Amharic' ? 'መውደዶን ገልትዋል' : TranslateApi({str: "You Have Liked Picture", id: 1}))
+                // ctx.MyAlert(ctx.language === 'Amharic' ? 'መውደዶን ገልትዋል' : TranslateApi({str: "You Have Liked Picture", id: 1}))
             } else {
                 setLikess(item.likes.length)
                 sethasLikedd(false)
-                ctx.MyAlert(ctx.language === 'Amharic' ? 'መውደዶን መግልጥ ኣልተቻለም እባኮን ትንሽ ቆይተው ይሞክሩ' : TranslateApi({str: "There was an error trying to like picture Please try again", id: 1}))
+                ctx.MyAlert("There was an error trying to like picture Please try again")
                 console.log(r, c)
             }
         }
@@ -357,7 +362,7 @@ function MoreModal({ item, showMore, setshowMore, callback }) {
                         <View style={{ width: '10%', height: 5, borderRadius: 20, alignSelf: 'center', backgroundColor: "lightgray" }} />
                         {item.is_me ?
                             <TouchableOpacity onPress={Delete} style={{ padding: 10, borderColor: '#2c3e50' }}>
-                                <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: 15 }}>{ctx.language === 'Amharic' ? 'ቻቻዬን ኣጥፋ' : TranslateApi({str: "Delete Post", id:  9})}</Text>
+                                <Text style={{ color: 'red', fontFamily: 'Poppins-Medium', fontSize: 15 }}>{ctx.language === 'Amharic' ? 'ቻቻዬን ኣጥፋ' : TranslateApi({ str: "Delete Post", id: 9 })}</Text>
                             </TouchableOpacity> : null}
                     </View>
                 </View>
@@ -370,38 +375,39 @@ function MakeAQuickPostRenderer({ setBody, TranslateApi, index, Post, body }) {
     const ctx = useContext(AppContext);
     const nav = useNavigation();
     return (
-    <Animated.View exiting={SlideOutUp} entering={SlideInUp} style={{
-        flexDirection: 'row',
-        alignSelf: 'center',
-        borderBottomWidth: 1,
-        borderColor: '#2c3e50',
-        paddingVertical: 10
-    }}>
-        <TextInput maxLength={200} style={{
-            padding: 5,
-            textAlign: 'left',
-            // borderRadius: 30,
+        <Animated.View exiting={SlideOutUp} entering={SlideInUp} style={{
+            flexDirection: 'row',
+            alignSelf: 'center',
+            borderBottomWidth: 1,
             borderColor: '#2c3e50',
-            fontFamily: 'Poppins-Regular',
-            color: ctx.textColor,
-            width: '80%',
-            marginRight: 5
-        }} multiline onChangeText={setBody} placeholder={ctx.language === 'Amharic' ? 'ፈጣን ቻቻ ላድርግ' : TranslateApi({str: "Make a quick Post", id: 2})} placeholderTextColor={'grey'}>
-            {body.split(/(\s+)/).map((item, index) => {
-                return <Text key={index} style={{
-                    fontFamily: item[0] === "@" || item[0] === "#" || item.includes("http://") || item.includes("https://") || item === '69' || item === '69420' ? 'Poppins-Bold' : 'Poppins-Regular',
-                    color: ctx.textColor
-                }}>{item}</Text>;
-            })}
-        </TextInput>
-        <TouchableOpacity onPress={Post} style={{
-            // backgroundColor: '#0077ff',
-            padding: 6,
-            borderRadius: 100
+            paddingVertical: 10,
+            position: 'static'
         }}>
-            <EvilIcons name='share-apple' size={35} color={ctx.textColor} />
-        </TouchableOpacity>
-    </Animated.View>);
+            <TextInput maxLength={200} style={{
+                padding: 5,
+                textAlign: 'left',
+                // borderRadius: 30,
+                borderColor: '#2c3e50',
+                fontFamily: ctx.RegularFont,
+                color: ctx.textColor,
+                width: '80%',
+                marginRight: 5
+            }} multiline onChangeText={setBody} placeholder={ctx.language === 'Amharic' ? 'ፈጣን ቻቻ ላድርግ' : TranslateApi({ str: "Make a quick Post", id: 2 })} placeholderTextColor={'grey'}>
+                {body.split(/(\s+)/).map((item, index) => {
+                    return <Text key={index} style={{
+                        fontFamily: item[0] === "@" || item[0] === "#" || item.includes("http://") || item.includes("https://") || item === '69' || item === '69420' ? 'Poppins-Bold' : 'Poppins-Regular',
+                        color: ctx.textColor
+                    }}>{item}</Text>;
+                })}
+            </TextInput>
+            <TouchableOpacity onPress={Post} style={{
+                // backgroundColor: '#0077ff',
+                padding: 6,
+                borderRadius: 100
+            }}>
+                <EvilIcons name='share-apple' size={35} color={ctx.textColor} />
+            </TouchableOpacity>
+        </Animated.View>);
 }
 
 const styles = StyleSheet.create({

@@ -26,7 +26,7 @@ export default function ViewProfile(props) {
     const [pfps, setpfps] = useState([])
     useEffect(() => {
         setUser(user)
-        setpfps(user.pfps)
+        setpfps(user?.pfps ? user?.pfps : [])
     }, [user])
     useEffect(() => {
         const cb = (r, c) => {
@@ -212,7 +212,7 @@ function ProfileCard({ profile, pfps }) {
                 </View> : null}
             {/* Pfp / Following / Followers etc.. */}
 
-            <ActionBtns IsFollowing={IsFollowing} IsMyProfile={IsMyProfile} Follow={Follow} IsFriends={IsFriends} NumberStyles={NumberStyles} Followers={Followers} Following={Following} Posts={Posts} />
+            <ActionBtns pfps={pfps} IsFollowing={IsFollowing} IsMyProfile={IsMyProfile} Follow={Follow} IsFriends={IsFriends} NumberStyles={NumberStyles} Followers={Followers} Following={Following} Posts={Posts} />
 
             <View style={{
                 padding: 10
@@ -328,7 +328,9 @@ function RenderBio({ str }) {
         return <View />
     }
 }
-function ActionBtns({ IsFollowing, IsMyProfile, Follow, IsFriends, NumberStyles, Followers, Following, Posts }) {
+function ActionBtns({ pfps, IsFollowing, IsMyProfile, Follow, IsFriends, NumberStyles, Followers, Following, Posts }) {
+    const nav = useNavigation();
+    const ctx = useContext(AppContext);
     return (<View style={{
         flexDirection: 'row',
         justifyContent: 'space-around'

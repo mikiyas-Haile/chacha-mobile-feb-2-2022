@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { useColorScheme, View, Dimensions, Text } from 'react-native'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from 'expo-notifications';
-import { MainLookup } from "./src/Lookup";
+import { MainLookup, FetchLookup } from "./src/Lookup";
 import { useNavigation } from "@react-navigation/native";
 import * as Progress from 'react-native-progress';
 import UploadImage from "./src/Components/UploadImage";
@@ -83,7 +83,7 @@ export function AppProvider({ children }) {
   const [scheme, setSchem] = useState(useColorScheme());
   const [ScreenIsLoading, setScreenIsLoading] = useState(false)
   const bgColor = scheme === 'dark' ? '#0d1216' : scheme === 'light' ? '#ededed' : scheme === 'color-blind' ? 'black' : scheme === 'ultra-dark' ? `black` : scheme === 'light-two' ? 'white' : 'white';
-  const textColor = scheme === 'light' ? '#2c3e50' : scheme === 'dark' ? '#e6e3e3' : scheme === 'color-blind' ? 'orange' : scheme === 'ultra-dark' ? `#bdc1c6` :  scheme === 'light-two' ? 'black' : 'white';
+  const textColor = scheme === 'light' ? '#2c3e50' : scheme === 'dark' ? '#e6e3e3' : scheme === 'color-blind' ? 'orange' : scheme === 'ultra-dark' ? `#bdc1c6` : scheme === 'light-two' ? 'black' : 'white';
   const setScheme = (theme) => {
     setSchem(theme);
     AsyncStorage.setItem('theme', theme)
@@ -215,10 +215,27 @@ export function AppProvider({ children }) {
     setBlackFont(language === 'Amharic' ? 'NotoSerifEthiopic-Black' : 'Poppins-Black')
     setMediumFont(language === 'Amharic' ? 'NotoSerifEthiopic-Medium' : 'Poppins-Medium')
     setLightFont(language === 'Amharic' ? 'NotoSerifEthiopic-Light' : 'Poppins-Light')
-  },[language])
+  }, [language])
+  const [Chats, setChats] = useState([]);
+
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const cb = (r, c) => {
+        if (c === 200 || c === 201) {
+          setChats(r)
+        }
+      }
+      FetchLookup(cb, { endpoint: `/api/chats`, method: 'GET' })
+    }, 1000)
+    return () => {
+      clearInterval(timer);
+    };
+  })
   return (
     <AppContext.Provider
       value={{
+        Chats,
         LightFont,
         BoldFont,
         BlackFont,

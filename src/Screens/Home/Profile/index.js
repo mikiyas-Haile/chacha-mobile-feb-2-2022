@@ -32,6 +32,11 @@ export default function YourProfile() {
         AsyncStorage.getItem("request_user", rcb)
     }, [])
     const Logout = () => {
+        AsyncStorage.removeItem("current_user_username")
+        AsyncStorage.removeItem("session_token")
+        AsyncStorage.removeItem("theme")
+        AsyncStorage.removeItem("request_user")
+        reloadApp()
         const cb = (r, c) => {
             console.log(r, c, 29)
             AsyncStorage.removeItem("current_user_username")
@@ -47,8 +52,8 @@ export default function YourProfile() {
         })
     }
     const ItemProps = {
-        color:"#2c3e50",
-        fontFamily:`Poppins-Regular`,
+        color: "#2c3e50",
+        fontFamily: `Poppins-Regular`,
         fontSize: 30
     }
     return (
@@ -113,7 +118,7 @@ export default function YourProfile() {
                             <RenderTextWithPlaceholder onPress={() => nav.push("Change Full Name")} placeholder={ctx.language === 'Amharic' ? `ሙሉ ስም` : TranslateApi({ str: "Full Name", id: 16 })} string={user.display_name} />
                             <RenderTextWithPlaceholder onPress={() => alert("Usernames are not changeable.")} placeholder={ctx.language === 'Amharic' ? `የተጠቃሚ ስም` : TranslateApi({ str: "User name", id: 17 })} string={user.username} />
                             <RenderTextWithPlaceholder onPress={() => nav.push("Change Bio")} placeholder={ctx.language === 'Amharic' ? `አጭር ታሪክ` : TranslateApi({ str: "Biography", id: 18 })} string={user.bio ? user.bio : 'Add your Bio'} />
-                            <RenderTextWithPlaceholder onPress={() => alert("You can not change your Email at this moment.")} placeholder={ctx.language === 'Amharic' ? `ኢ-ሜል` : TranslateApi({ str: "Email", id: 19 })}  string={user.email} />
+                            <RenderTextWithPlaceholder onPress={() => alert("You can not change your Email at this moment.")} placeholder={ctx.language === 'Amharic' ? `ኢ-ሜል` : TranslateApi({ str: "Email", id: 19 })} string={user.email} />
                             <RenderTextWithPlaceholder onPress={() => nav.push("Change Phone Number")} placeholder={ctx.language === 'Amharic' ? `ስልክ ቁጥር` : TranslateApi({ str: "Phone Number", id: 20 })} string={user.phone_number} />
                             <RenderTextWithPlaceholder onPress={() => alert("You can not update Country at this moment.")} placeholder={ctx.language === 'Amharic' ? `ሀገር` : TranslateApi({ str: "Country", id: 21 })} string={user.country} />
                             {/* <RenderTextWithPlaceholder onPress={() => alert("You can not update Country code at this moment.")} placeholder={'Country Code'} string={user.country_code} /> */}
@@ -124,7 +129,7 @@ export default function YourProfile() {
                                     fontFamily: 'Poppins-Bold',
                                     fontSize: 25,
                                     // textAlign: 'center'
-                                }}>{ctx.language === 'Amharic' ? `ቋንቋ` : TranslateApi({ str: "Language", id: 15 }) }</Text>
+                                }}>{ctx.language === 'Amharic' ? `ቋንቋ` : TranslateApi({ str: "Language", id: 15 })}</Text>
 
                                 <Picker
                                     mode={`dropdown`}
@@ -151,7 +156,7 @@ export default function YourProfile() {
                                     fontFamily: 'Poppins-Light',
                                     color: ctx.textColor
                                 }}>
-                                    {ctx.language === 'Amharic' ? `ልውጣ` : TranslateApi({ str: "Logout", id: 14 }) }
+                                    {ctx.language === 'Amharic' ? `ልውጣ` : TranslateApi({ str: "Logout", id: 14 })}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -245,97 +250,101 @@ export function RenderUserPfpsList(props) {
     }
     const ppfss = pfps ? pfps : user.pfps
     const ImageList = image ? image : ppfss
-    try {
-        return (
-            <>
-                <View style={{ position: 'relative' }}>
-                    <Swiper
-                        onTouchEnd={() => {
-                            nav.push("View Pictures", { imgs: ImageList })
-                        }}
-                        dotColor={ctx.bgColor}
-                        activeDotColor={ctx.textColor}
-                        style={{ height: height / 4 }}>
-                        {ImageList.map((item, index) => {
-                            return (
-                                <ImageBackground key={index} style={{ flex: 1 }} source={{ uri: item.uri }}>
-                                    <LinearGradient
-                                        colors={['#17171700', ctx.bgColor]}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 0, y: 1 }} style={{
-                                            flex: 1
-                                        }}>
-                                    </LinearGradient>
-                                </ImageBackground>
+    console.log(ImageList.length)
+    return (
+        <>
+            <View style={{ position: 'relative' }}>
+                <Swiper
+                    onTouchEnd={() => {
+                        nav.push("View Pictures", { imgs: ImageList })
+                    }}
+                    dotColor={ctx.bgColor}
+                    activeDotColor={ctx.textColor}
+                    style={{ height: height / 4 }}>
+                    {ImageList.length > 0 ?
+                        <>
+                            {ImageList.map((item, index) => {
+                                return (
+                                    <ImageBackground key={index} style={{ flex: 1 }} source={{ uri: item.uri }}>
+                                        <LinearGradient
+                                            colors={['#17171700', ctx.bgColor]}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 0, y: 1 }} style={{
+                                                flex: 1
+                                            }}>
+                                        </LinearGradient>
+                                    </ImageBackground>
 
-                            )
-                        })}
-                    </Swiper>
-                    <TouchableOpacity style={{
-                        position: 'absolute',
-                        bottom: 10,
-                        left: 10,
-                        borderRadius: 100,
-                        padding: 10
-                    }}>
-                        <Text style={{
-                            fontSize: 20,
-                            fontFamily: 'Poppins-Bold',
-                            color: ctx.textColor,
-                            height: 30
-                        }}>{user.display_name}
+                                )
+                            })}
+                        </>
+                        :
+                        <View style={{ height: height / 4, width: '100%', backgroundColor: 'grey' }} />
+                    }
+                </Swiper>
 
-                            {user.is_verified ? <AntDesign style={{ marginLeft: 5 }} name='checkcircle' size={17} color={'#00a2f9'} /> : null}
-                        </Text>
-                        <Text style={{
-                            fontSize: 17,
-                            fontFamily: 'Poppins-Regular',
-                            color: ctx.textColor
-                        }}>@{user.username}</Text>
-                    </TouchableOpacity>
+                <TouchableOpacity style={{
+                    position: 'absolute',
+                    bottom: 10,
+                    left: 10,
+                    borderRadius: 100,
+                    padding: 10
+                }}>
+                    <Text style={{
+                        fontSize: 20,
+                        fontFamily: 'Poppins-Bold',
+                        color: ctx.textColor,
+                        height: 30
+                    }}>{user.display_name}
 
-                    {!viewing ? <TouchableOpacity onPress={PickImage} style={{
-                        alignSelf: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: Touched ? 'green' : '#2c3e50',
-                        position: 'absolute',
-                        bottom: 10,
-                        right: 10,
-                        borderRadius: 100,
-                        padding: 10
-                    }}>
-                        <IonIcons name={Touched ? 'checkmark' : 'image'} size={30} color={'white'} />
-                    </TouchableOpacity> : null}
-                </View>
-                <Modal
-                    animated
-                    animationType={"slide"}
-                    statusBarTranslucent
-                    visible={more}
-                    transparent
-                    onDismiss={() => (setshowMore(false))}
-                    onRequestClose={() => (setshowMore(false))}>
-                    <TouchableWithoutFeedback onPress={() => (setshowMore(false))}>
-                        <View style={{ flex: 1, backgroundColor: '#00000000' }}>
-                            <View style={{ backgroundColor: ctx.bgColor, marginTop: 'auto', padding: 10, borderTopRightRadius: 20, borderTopLeftRadius: 20, borderColor: '#2c3e50', borderWidth: 1 }}>
-                                <View style={{ width: '10%', height: 5, borderRadius: 20, alignSelf: 'center', backgroundColor: "lightgray" }} />
-                                <TouchableOpacity onPress={OpenCamera} style={{ padding: 10, borderColor: '#2c3e50', flexDirection: 'row', alignItems: 'center' }}>
-                                    <EvilIcons size={50} name='camera' color={ctx.textColor} />
-                                    <Text style={{ color: ctx.textColor, fontFamily: 'Poppins-Medium', fontSize: 15 }}>Open Camera</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={OpenLibrary} style={{ padding: 10, borderColor: '#2c3e50', flexDirection: 'row', alignItems: 'center' }}>
-                                    <EvilIcons size={50} name='image' color={ctx.textColor} />
-                                    <Text style={{ color: ctx.textColor, fontFamily: 'Poppins-Medium', fontSize: 15 }}>Choose from Gallery</Text>
-                                </TouchableOpacity>
-                            </View>
+                        {user.is_verified ? <AntDesign style={{ marginLeft: 5 }} name='checkcircle' size={17} color={'#00a2f9'} /> : null}
+                    </Text>
+                    <Text style={{
+                        fontSize: 17,
+                        fontFamily: 'Poppins-Regular',
+                        color: ctx.textColor
+                    }}>@{user.username}</Text>
+                </TouchableOpacity>
+
+                {!viewing ? <TouchableOpacity onPress={PickImage} style={{
+                    alignSelf: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: Touched ? 'green' : '#2c3e50',
+                    position: 'absolute',
+                    bottom: 10,
+                    right: 10,
+                    borderRadius: 100,
+                    padding: 10
+                }}>
+                    <IonIcons name={Touched ? 'checkmark' : 'image'} size={30} color={'white'} />
+                </TouchableOpacity> : null}
+            </View>
+            <Modal
+                animated
+                animationType={"slide"}
+                statusBarTranslucent
+                visible={more}
+                transparent
+                onDismiss={() => (setshowMore(false))}
+                onRequestClose={() => (setshowMore(false))}>
+                <TouchableWithoutFeedback onPress={() => (setshowMore(false))}>
+                    <View style={{ flex: 1, backgroundColor: '#00000000' }}>
+                        <View style={{ backgroundColor: ctx.bgColor, marginTop: 'auto', padding: 10, borderTopRightRadius: 20, borderTopLeftRadius: 20, borderColor: '#2c3e50', borderWidth: 1 }}>
+                            <View style={{ width: '10%', height: 5, borderRadius: 20, alignSelf: 'center', backgroundColor: "lightgray" }} />
+                            <TouchableOpacity onPress={OpenCamera} style={{ padding: 10, borderColor: '#2c3e50', flexDirection: 'row', alignItems: 'center' }}>
+                                <EvilIcons size={50} name='camera' color={ctx.textColor} />
+                                <Text style={{ color: ctx.textColor, fontFamily: 'Poppins-Medium', fontSize: 15 }}>Open Camera</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={OpenLibrary} style={{ padding: 10, borderColor: '#2c3e50', flexDirection: 'row', alignItems: 'center' }}>
+                                <EvilIcons size={50} name='image' color={ctx.textColor} />
+                                <Text style={{ color: ctx.textColor, fontFamily: 'Poppins-Medium', fontSize: 15 }}>Choose from Gallery</Text>
+                            </TouchableOpacity>
                         </View>
-                    </TouchableWithoutFeedback>
-                </Modal>
-            </>
-        )
-    } catch (e) {
-        return <View />
-    }
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+        </>
+    )
 }
 function RenderTextWithPlaceholder(props) {
     const { onPress, string, placeholder } = props;
@@ -408,13 +417,13 @@ function Notifications() {
                 fontSize: 25,
                 // textAlign: 'center'
             }}>{TranslateApi({ str: "Notifications", id: 27 })}</Text>
-            <RenderStringWithSwitch type={'has_allowed_post_like_notifs'} callback={callback} placeholder={ctx.language === 'Amharic' ? `መውደድ መግለጫዎች` : TranslateApi({ str: "Likes", id: 5 }) } bool={user.has_allowed_post_like_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_reply_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ምላሾች" : TranslateApi({ str: 'Reposts', id : 8 })} bool={user.has_allowed_reply_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_follow_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ኣዲስ ተከታዮች" : TranslateApi({ str: 'New Followers', id : 22 })} bool={user.has_allowed_follow_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_recommendation_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ምክረ ሐሳቦች" : TranslateApi({ str: 'Recommendations', id : 23 })} bool={user.has_allowed_recommendation_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_trending_notifs'} callback={callback} placeholder= { ctx.language === 'Amharic' ? "አዝማሚያዎች" : TranslateApi({ str: 'Trends', id : 24 })} bool={user.has_allowed_trending_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_new_chat_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ኣዲስ መልእክቶች" : TranslateApi({ str: 'New Chats', id : 25 })} bool={user.has_allowed_new_chat_notifs} />
-            <RenderStringWithSwitch type={'has_allowed_new_post_from_following_notifs'} callback={callback} placeholder={ ctx.language === 'Amharic' ? "ኣዲስ ቻቻዎች ከምከተላቸው ሰዎች" : TranslateApi({ str: 'New Posts from following', id : 26 })} bool={user.has_allowed_new_post_from_following_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_post_like_notifs'} callback={callback} placeholder={ctx.language === 'Amharic' ? `መውደድ መግለጫዎች` : TranslateApi({ str: "Likes", id: 5 })} bool={user.has_allowed_post_like_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_reply_notifs'} callback={callback} placeholder={ctx.language === 'Amharic' ? "ምላሾች" : TranslateApi({ str: 'Reposts', id: 8 })} bool={user.has_allowed_reply_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_follow_notifs'} callback={callback} placeholder={ctx.language === 'Amharic' ? "ኣዲስ ተከታዮች" : TranslateApi({ str: 'New Followers', id: 22 })} bool={user.has_allowed_follow_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_recommendation_notifs'} callback={callback} placeholder={ctx.language === 'Amharic' ? "ምክረ ሐሳቦች" : TranslateApi({ str: 'Recommendations', id: 23 })} bool={user.has_allowed_recommendation_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_trending_notifs'} callback={callback} placeholder={ctx.language === 'Amharic' ? "አዝማሚያዎች" : TranslateApi({ str: 'Trends', id: 24 })} bool={user.has_allowed_trending_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_new_chat_notifs'} callback={callback} placeholder={ctx.language === 'Amharic' ? "ኣዲስ መልእክቶች" : TranslateApi({ str: 'New Chats', id: 25 })} bool={user.has_allowed_new_chat_notifs} />
+            <RenderStringWithSwitch type={'has_allowed_new_post_from_following_notifs'} callback={callback} placeholder={ctx.language === 'Amharic' ? "ኣዲስ ቻቻዎች ከምከተላቸው ሰዎች" : TranslateApi({ str: 'New Posts from following', id: 26 })} bool={user.has_allowed_new_post_from_following_notifs} />
             {msg ?
                 <View id="snackbar" style={{
                     opacity: SnackBarOpacity,

@@ -64,9 +64,7 @@ export default function FeedScreen() {
         }
     }, [nextUrl])
     const LoadPostss = () => {
-        setRefreshing(true)
         const cb = (r, c) => {
-            setRefreshing(false)
             if (c === 200) {
                 setPostss(r)
             }
@@ -75,7 +73,7 @@ export default function FeedScreen() {
     }
     useEffect(() => {
         LoadPostss()
-    },[])
+    }, [])
     const callback = (type, item) => {
         const posts = postss.filter(obj => obj.id !== item.id)
         try {
@@ -116,16 +114,45 @@ export default function FeedScreen() {
     }, []);
     return (
         <View style={styles.container}>
-            <Am.ScrollView
-            data={postss}
-            renderItem={renderData}
+            <Am.FlatList
+                ListFooterComponent={() => (
+                    <View style={{
+                        height: height / 2,
+                        width: width,
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <TouchableOpacity onPress={() => nav.push('Home', { screen: 'Create' })} style={{
+                            alignSelf: 'center',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderColor: ctx.textColor,
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            width: width / 3,
+                            height: height / 4,
+                            padding: 10
+                        }}>
+                            <Ionicons name='add-circle-outline' color={ctx.textColor} size={width / 4} />
+                            <Text style={{
+                                fontFamily: ctx.RegularFont,
+                                textAlign: 'center',
+                                fontSize: 13,
+                                color: ctx.textColor,
+                            }} >{ctx.language === 'Amharic' ? 'የወዳጅ ቻቻዎች እዚህ ይታያሉ' : TranslateApi({ str: "Posts from friends will appear here", id: 0 })}</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                data={postss}
+                renderItem={renderData}
                 ref={scrollRef}
                 contentContainerStyle={styles.gallery}
                 style={{
                     zIndex: 0,
                     height: '100%',
                     elevation: -1,
-                    paddingTop: 50
+                    paddingTop: 50,
+                    backgroundColor: ctx.bgColor
                 }}
                 scrollEventThrottle={1}
                 bounces={true}
@@ -140,18 +167,136 @@ export default function FeedScreen() {
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }>
-                {postss.map(item => {
+                {/* {postss.map(item => {
                     return (
                         <PostCard callback={callback} item={item} key={item.id} />
                     )
-                })}
-            </Am.ScrollView>
+                })} */}
+            </Am.FlatList>
             <Am.View style={[styles.header, { transform: [{ translateY }] }]}>
                 <MakeAQuickPostRenderer setBody={setBody} TranslateApi={TranslateApi} Post={Post} body={body} />
             </Am.View>
         </View>
     )
 }
+
+export function Feed() {
+    // export default function FeedScreen() {
+    const ctx = useContext(AppContext);
+    const nav = useNavigation();
+    const [posts, setPosts] = useState([])
+    const [postss, setPostss] = useState([])
+    const [refreshing, setrefreshing] = useState(false)
+    const [nextUrl, setnext] = useState()
+    useEffect(() => {
+        if (nextUrl) {
+            const cb = (r, c) => {
+                if (c === 200) {
+                    setnext(r.next)
+                    // setPostss([...postss].concat(r.results))
+                    // setPostss([[...postss], [r.results]])
+                    setPostss([...new Set([...postss, ...r.results])])
+                }
+            }
+            FetchLookup(cb, { method: 'GET', endpoint: `/api/post/${nextUrl.split("/").slice(-1)}` })
+        }
+    }, [nextUrl])
+    const LoadPostss = () => {
+        setrefreshing(true)
+        const cb = (r, c) => {
+            setrefreshing(false)
+            if (c === 200) {
+                setPostss(r)
+            }
+        }
+        FetchLookup(cb, { method: 'GET', endpoint: '/api/post/list' })
+    }
+    const callback = (type, item) => {
+        const posts = postss.filter(obj => obj.id !== item.id)
+        try {
+            setPostss(posts)
+        } catch (e) {
+            console.log(e)
+            setPostss([posts])
+        }
+    }
+    const renderData = ({ item, index }) => {
+        return (
+            <PostCard callback={callback} item={item} key={item.id} />
+        )
+    }
+    const [body, setBody] = useState('');
+    const Post = () => {
+        if (body) {
+            setBody('')
+            const callback = (r, c) => {
+                if (c === 201) {
+                    setPostss([r, ...postss])
+                }
+            }
+            ctx.Post(body, callback)
+        }
+    }
+    const [offset, setoffset] = useState(0)
+    const [showInput, setShowInput] = useState(true)
+
+    return (
+        <View style={{
+            flex: 1,
+            backgroundColor: ctx.bgColor,
+        }}>
+            {showInput && <MakeAQuickPostRenderer setBody={setBody} TranslateApi={TranslateApi} Post={Post} body={body} />}
+
+            <FlatList
+                ListHeaderComponent={() => (
+                    <>
+                        {!showInput && <View style={{ width: '100%', height: 60, backgroundColor: ctx.bgColor }} />}
+                    </>
+
+                )}
+                onScroll={(event) => {
+                    var currentOffset = event.nativeEvent.contentOffset.y;
+                    var direction = currentOffset > offset ? 'down' : 'up';
+                    setoffset(currentOffset);
+                    if (direction === 'down') {
+                        setShowInput(false)
+                    } else {
+                        setShowInput(true)
+                    }
+                }}
+                ListFooterComponent={() => (
+                    <View style={{
+                        height: height / 2,
+                        width: width,
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <TouchableOpacity onPress={() => nav.push('Home', { screen: 'Create' })} style={{
+                            alignSelf: 'center',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderColor: ctx.textColor,
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            width: width / 3,
+                            height: height / 4,
+                            padding: 10
+                        }}>
+                            <Ionicons name='add-circle-outline' color={ctx.textColor} size={width / 4} />
+                            <Text style={{
+                                fontFamily: ctx.RegularFont,
+                                textAlign: 'center',
+                                fontSize: 13,
+                                color: ctx.textColor,
+                            }} >{ctx.language === 'Amharic' ? 'የወዳጅ ቻቻዎች እዚህ ይታያሉ' : TranslateApi({ str: "Posts from friends will appear here", id: 0 })}</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                onRefresh={LoadPostss} refreshing={refreshing} keyExtractor={(i, k) => k.toString()} data={postss} renderItem={renderData} />
+        </View>
+    )
+}
+
 export function PostCard(props) {
     const { item, callback } = props;
     const [SecondaryItem, setSecondaryItem] = useState()

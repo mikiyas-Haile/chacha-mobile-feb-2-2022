@@ -19,23 +19,25 @@ const { height, width } = Dimensions.get('window')
 function Chats() {
     const nav = useNavigation()
     const ctx = useContext(AppContext);
-    const [Chats, setChats] = useState([]);
-    // useEffect(() => {
-    //     console.log(ctx.token)
-    // },[])
+    const [Chats, setChats] = useState(ctx.Chats);
     useEffect(() => {
-        const timer = setInterval(() => {
-            const cb = (r, c) => {
-                if (c === 200 || c === 201) {
-                    setChats(r)
-                }
-            }
-            FetchLookup(cb, { endpoint: `/api/chats`, method: 'GET' })
-        }, 1000)
-        return () => {
-            clearInterval(timer);
-        };
-    })
+        setChats(ctx.Chats);
+
+    },[ctx.Chats])
+
+    // useEffect(() => {
+    //     const timer = setInterval(() => {
+    //         const cb = (r, c) => {
+    //             if (c === 200 || c === 201) {
+    //                 setChats(r)
+    //             }
+    //         }
+    //         FetchLookup(cb, { endpoint: `/api/chats`, method: 'GET' })
+    //     }, 1000)
+    //     return () => {
+    //         clearInterval(timer);
+    //     };
+    // })
     useEffect(() => {
         nav.setOptions({
             headerRight: () => (

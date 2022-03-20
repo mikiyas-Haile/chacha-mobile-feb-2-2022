@@ -95,8 +95,8 @@ function Screens() {
       <BottomTab.Group screenOptions={{
         headerStyle: {
           backgroundColor: ctx.bgColor,
-          borderBottomWidth: 5,
-          borderColor: "#2c3e50"
+          borderBottomWidth: 1,
+          borderBottomColor: ctx.textColor
         },
         headerTitleStyle: {
           fontFamily: 'Poppins-Bold',

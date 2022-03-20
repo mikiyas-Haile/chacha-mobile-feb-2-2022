@@ -392,7 +392,17 @@ export const SentencesList = [
         "af": "Jou foonnommer is nie geverifieer nie.",
         "am": "ስልክ ቁጥሮ አልተረጋገጠም።",
         oro: "Bilbila lakkoofsa hinbeekkamne"
+    },
+    {
+        "id": 38,
+        "src": "Noon Mode",
+        "sw": "Hali ya Mchana",
+        "ar": "وضع الظهيرة",
+        "fr": "Noon Mode",
+        "es": "Modo mediodía",
+        "af": "Middagmodus",
+        "am": "እኩለ ቀን እይታ",
+        "oro": "Noon Mode"
     }
-
 
 ]

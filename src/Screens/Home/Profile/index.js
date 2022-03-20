@@ -337,7 +337,6 @@ export function RenderUserPfpsList(props) {
         return <View />
     }
 }
-
 function RenderTextWithPlaceholder(props) {
     const { onPress, string, placeholder } = props;
     const ctx = useContext(AppContext);
@@ -500,6 +499,7 @@ function SelectTheme() {
                         onValueChange={(itemVal, itemIndex) => ctx.setScheme(itemVal)}
                         style={{ fontFamily: `Poppins-Regular`, color: ctx.textColor, paddingHorizontal: 10, borderWidth: 1, borderColor: `#2c3e50`, borderRadius: 10 }}>
                         <Picker.Item fontFamily={`Poppins-Regular`} label={TranslateApi({ str: "Light Mode", id: 30 })} value={`light`} />
+                        <Picker.Item fontFamily={`Poppins-Regular`} label={TranslateApi({ str: "Noon Mode", id: 38 })} value={`light-two`} />
                         <Picker.Item fontFamily={`Poppins-Regular`} label={TranslateApi({ str: "Dark Mode", id: 31 })} value={`dark`} />
                         <Picker.Item fontFamily={`Poppins-Regular`} label={TranslateApi({ str: "Midnight Mode", id: 32 })} value={`ultra-dark`} />
                         <Picker.Item fontFamily={`Poppins-Regular`} label={TranslateApi({ str: "High Contrast Mode", id: 33 })} value={`color-blind`} />

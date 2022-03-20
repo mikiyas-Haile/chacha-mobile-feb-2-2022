@@ -61,7 +61,7 @@ function AddLoginEmail() {
             <TextInput autoCapitalize='none' value={Email} onChangeText={val => (setEmail(val))}
                 style={{
                     color: ctx.textColor,
-                    fontFamily: 'Poppins-Bold',
+                    fontFamily: 'Poppins-Regular',
                     fontSize: 25,
                 }} placeholder={'Enter Email here'} placeholderTextColor={ctx.textColor} />
             <Text style={{ fontSize: 15, fontFamily: 'Poppins-Light', color: ctx.textColor, marginTop: 30 }}>Enter the email address you registered using.</Text>
@@ -176,7 +176,7 @@ function AddLoginPassword(props) {
             <TextInput autoCapitalize='none' value={Password} onChangeText={val => (setPassword(val))}
                 style={{
                     color: ctx.textColor,
-                    fontFamily: 'Poppins-Bold',
+                    fontFamily: 'Poppins-Regular',
                     fontSize: 25,
                 }} placeholder={'Enter Password here'} placeholderTextColor={ctx.textColor} secureTextEntry={true} />
             <Text style={{ fontSize: 15, fontFamily: 'Poppins-Light', color: ctx.textColor, marginTop: 30 }}>Enter the Password address you registered using.</Text>

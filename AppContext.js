@@ -82,8 +82,8 @@ export function AppProvider({ children }) {
   }, [])
   const [scheme, setSchem] = useState(useColorScheme());
   const [ScreenIsLoading, setScreenIsLoading] = useState(false)
-  const bgColor = scheme === 'dark' ? '#0d1216' : scheme === 'light' ? '#ededed' : scheme === 'color-blind' ? 'black' : scheme === 'ultra-dark' ? `black` : 'white';
-  const textColor = scheme === 'light' ? '#2c3e50' : scheme === 'dark' ? '#e6e3e3' : scheme === 'color-blind' ? 'orange' : scheme === 'ultra-dark' ? `#bdc1c6` : 'white';
+  const bgColor = scheme === 'dark' ? '#0d1216' : scheme === 'light' ? '#ededed' : scheme === 'color-blind' ? 'black' : scheme === 'ultra-dark' ? `black` : scheme === 'light-two' ? 'white' : 'white';
+  const textColor = scheme === 'light' ? '#2c3e50' : scheme === 'dark' ? '#e6e3e3' : scheme === 'color-blind' ? 'orange' : scheme === 'ultra-dark' ? `#bdc1c6` :  scheme === 'light-two' ? 'black' : 'white';
   const setScheme = (theme) => {
     setSchem(theme);
     AsyncStorage.setItem('theme', theme)

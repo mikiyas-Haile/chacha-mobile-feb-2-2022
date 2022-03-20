@@ -203,7 +203,7 @@ export function BodyRender(props) {
                             )
                         } else {
                             return (
-                                <TouchableOpacity key={index} onPress={() => (nav.navigate('View Profile', { username: item.replace("@", '') }))} style={{ paddingRight: 1 }}>
+                                <TouchableOpacity key={index} onPress={() => (nav.navigate('View Profile', { user: item.replace("@", '') }))} style={{ paddingRight: 1 }}>
                                     <Text style={[styles.colorTextInBodyTagAndMentionStyle, { color: ctx.scheme === 'dark' ? ctx.textColor : '#fe2c55' }]}>{item}</Text>
                                 </TouchableOpacity>
                             )

@@ -20,66 +20,47 @@ export default function ViewProfile(props) {
     const ctx = useContext(AppContext);
     const nav = useNavigation();
     const { user } = props?.route?.params;
-    const [User, setUser] = useState([]);
-    const [loaded, setLoaded] = useState(true);
+    const [filled, setFilled] = useState(false);
     const [UserNotFound, setUserNotFound] = useState(false)
-    const [pfps, setpfps] = useState([])
-    useEffect(() => {
-        setUser(user)
-        setpfps(user?.pfps ? user?.pfps : [])
-    }, [user])
-    useEffect(() => {
-        const cb = (r, c) => {
-            if (c === 200) {
-                console.log("Done")
-                // console.log(r.user)
-                setpfps(r.pfps)
+    const [User, setUser] = useState([]);
+    const [pfps, setpfps] = useState([]);
 
-                setUser(r)
-                // setLoaded(true)
-                // setUserNotFound(false)
-            } else if (c === 404) {
-                setLoaded(true)
-                setUserNotFound(true)
-            } else {
-                setLoaded(false)
-                ctx.MyAlert("There was an error Please try again later")
+    useEffect(() => {
+        if (user["pfps"] === undefined) {
+            const cb = (r, c) => {
+                if (c === 200) {
+                    setpfps(r?.pfps ? r?.pfps : [])
+                    setUser(r)
+                    setFilled(true)
+                } else if (c === 404) {
+                    setUserNotFound(true)
+                } else {
+                    setLoaded(false)
+                    ctx.MyAlert("There was an error Please try again later")
+                }
             }
-        }
-        MainLookup(cb, { method: 'GET', endpoint: `/api/user/${user.username}/no-post` })
-
-        return () => {
-            setLoaded(false);
-            setUser([]);
-            setUserNotFound(false)
+            MainLookup(cb, { method: 'GET', endpoint: `/api/user/${user}/no-post` })
+        } else {
+            setpfps(user?.pfps ? user?.pfps : [])
+            setFilled(true)
+            setUser(user)
         }
     }, [])
 
-    try {
+    useEffect(() => {
+
+        return () => {
+            setUser([]);
+            setFilled(false)
+        }
+    }, [])
+
+    const profileProps = { User, UserNotFound, pfps }
+    if (filled) {
         return (
-            <>
-                {pfps ? <ScrollView style={{
-                    flex: 1,
-                    backgroundColor: ctx.bgColor,
-                }}>
-                    <ProfileCard pfps={pfps} profile={User ? User : user} />
-                </ScrollView> : <View />}
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    position: 'absolute',
-                    top: 20,
-                    left: 0,
-                    padding: 20,
-                    alignItems: 'center'
-                }}>
-                    <TouchableOpacity onPress={() => (nav.pop())} style={{ backgroundColor: '#17171795', padding: 10, borderRadius: 100 }}>
-                        <IonIcons name='arrow-back' color={'white'} size={25} />
-                    </TouchableOpacity>
-                </View>
-            </>
+            <RenderProfile {...profileProps} />
         )
-    } catch (e) {
+    } else {
         return (
             <View style={{
                 flex: 1,
@@ -91,6 +72,37 @@ export default function ViewProfile(props) {
             </View>
         )
     }
+
+}
+function RenderProfile(props) {
+    const ctx = useContext(AppContext);
+    const nav = useNavigation();
+    const { User, UserNotFound, pfps } = props;
+    const [loaded, setLoaded] = useState(true);
+
+    return (
+        <>
+            {pfps ? <ScrollView style={{
+                flex: 1,
+                backgroundColor: ctx.bgColor,
+            }}>
+                <ProfileCard pfps={pfps} profile={User} />
+            </ScrollView> : <View />}
+            <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                position: 'absolute',
+                top: 20,
+                left: 0,
+                padding: 20,
+                alignItems: 'center'
+            }}>
+                <TouchableOpacity onPress={() => (nav.pop())} style={{ backgroundColor: '#17171795', padding: 10, borderRadius: 100 }}>
+                    <IonIcons name='arrow-back' color={'white'} size={25} />
+                </TouchableOpacity>
+            </View>
+        </>
+    )
 }
 function ProfileCard({ profile, pfps }) {
     const nav = useNavigation();
@@ -136,7 +148,6 @@ function ProfileCard({ profile, pfps }) {
         const cb = (r, c) => {
             console.log(r, c)
             if (c === 201 || c === 200) {
-
                 setBlockingUsers(r.other.blocking_users)
                 setBlockedUsers(r.other.blocked_users)
                 setFollowers(r.other.followers)
@@ -149,11 +160,6 @@ function ProfileCard({ profile, pfps }) {
                 setIsVerified(r.other.is_verified)
                 setHasBlocked(r.other.has_blocked)
                 setIsFriends(r.other.friends)
-
-                // setSnackBarVisibility('visible')
-                // setTimeout(() => {
-                //     setSnackBarVisibility('hidden')
-                // }, 2000)
             }
         }
         MainLookup(cb, { csrf: CSRFToken, endpoint: `/api/user/action`, method: 'POST', data: { action: action, id: profile.id } })
@@ -241,8 +247,6 @@ function ProfileCard({ profile, pfps }) {
         </>
     )
 }
-
-
 function MoreModal({ item, showMore, setshowMore, callback, IsFollowing, HasBlocked, IsMyProfile, IsBlocked }) {
     const more = showMore;
     const ctx = useContext(AppContext);
@@ -286,7 +290,6 @@ function MoreModal({ item, showMore, setshowMore, callback, IsFollowing, HasBloc
         </Modal>
     )
 }
-
 function RenderBio({ str }) {
     const ctx = useContext(AppContext);
     const nav = useNavigation();
@@ -331,115 +334,116 @@ function RenderBio({ str }) {
 function ActionBtns({ pfps, IsFollowing, IsMyProfile, Follow, IsFriends, NumberStyles, Followers, Following, Posts }) {
     const nav = useNavigation();
     const ctx = useContext(AppContext);
-    return (<View style={{
-        flexDirection: 'row',
-        justifyContent: 'space-around'
-    }}>
+    return (
         <View style={{
-            width: '25%'
-        }}>
-            {pfps.length > 0 && <Image style={{
-                width: 70,
-                height: 70,
-                borderRadius: 100,
-                marginHorizontal: 10
-            }} source={{
-                uri: pfps[0].uri
-            }} />}
-        </View>
-        <View style={{
-            width: '60%'
+            flexDirection: 'row',
+            justifyContent: 'space-around'
         }}>
             <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center'
+                width: '25%'
             }}>
-                {!IsFollowing && !IsMyProfile && <TouchableOpacity onPress={Follow} style={{
-                    padding: 5,
-                    width: '50%',
-                    borderColor: '#2c3e50',
-                    borderWidth: 1,
+                {pfps.length > 0 && <Image style={{
+                    width: 70,
+                    height: 70,
                     borderRadius: 100,
+                    marginHorizontal: 10
+                }} source={{
+                    uri: pfps[0].uri
+                }} />}
+            </View>
+            <View style={{
+                width: '60%'
+            }}>
+                <View style={{
+                    flexDirection: 'row',
                     alignItems: 'center',
-                    marginHorizontal: 3
+                    justifyContent: 'center'
                 }}>
-                    <Text style={{
-                        color: ctx.textColor,
-                        fontFamily: 'Poppins-Medium'
-                    }}>Follow</Text>
-                </TouchableOpacity>}
-                {IsFollowing || IsFriends && <TouchableOpacity style={{
+                    {!IsFollowing && !IsMyProfile && <TouchableOpacity onPress={Follow} style={{
+                        padding: 5,
+                        width: '50%',
+                        borderColor: '#2c3e50',
+                        borderWidth: 1,
+                        borderRadius: 100,
+                        alignItems: 'center',
+                        marginHorizontal: 3
+                    }}>
+                        <Text style={{
+                            color: ctx.textColor,
+                            fontFamily: 'Poppins-Medium'
+                        }}>Follow</Text>
+                    </TouchableOpacity>}
+                    {IsFollowing || IsFriends && <TouchableOpacity style={{
+                        padding: 5,
+                        width: '50%',
+                        borderColor: '#2c3e50',
+                        borderWidth: 1,
+                        borderRadius: 100,
+                        alignItems: 'center'
+                    }}>
+                        <Text style={{
+                            color: ctx.textColor,
+                            fontFamily: 'Poppins-Medium'
+                        }}>Message</Text>
+                    </TouchableOpacity>}
+                </View>
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    width: '100%'
+                }}>
+                    <View style={{
+                        alignItems: 'center'
+                    }}>
+                        <Text style={NumberStyles}>{Followers}</Text>
+                        <Text style={NumberStyles}>Followers</Text>
+                    </View>
+                    <View style={{
+                        alignItems: 'center'
+                    }}>
+                        <Text style={NumberStyles}>{Following}</Text>
+                        <Text style={NumberStyles}>Following</Text>
+                    </View>
+                    <View style={{
+                        alignItems: 'center'
+                    }}>
+                        <Text style={NumberStyles}>{Posts}</Text>
+                        <Text style={NumberStyles}>Posts</Text>
+                    </View>
+                </View>
+                {IsFriends && IsFollowing ? <View style={{
+                    borderRadius: 5,
+                    fontSize: 17,
+                    color: '#fe2c55',
+                    backgroundColor: '#fe2c55',
+                    flexDirection: 'row',
                     padding: 5,
                     width: '50%',
-                    borderColor: '#2c3e50',
-                    borderWidth: 1,
-                    borderRadius: 100,
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginVertical: 5
                 }}>
                     <Text style={{
-                        color: ctx.textColor,
-                        fontFamily: 'Poppins-Medium'
-                    }}>Message</Text>
-                </TouchableOpacity>}
+                        fontFamily: 'Poppins-Regular',
+                        color: 'white'
+                    }}>Friends</Text>
+                </View> : null}
+                {!IsFriends && IsFollowing ? <View style={{
+                    borderRadius: 5,
+                    fontSize: 17,
+                    backgroundColor: '#2c3e50',
+                    flexDirection: 'row',
+                    padding: 5,
+                    width: '50%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginVertical: 5
+                }}>
+                    <Text style={{
+                        fontFamily: 'Poppins-Regular',
+                        color: 'white'
+                    }}>Following</Text>
+                </View> : null}
             </View>
-            <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                width: '100%'
-            }}>
-                <View style={{
-                    alignItems: 'center'
-                }}>
-                    <Text style={NumberStyles}>{Followers}</Text>
-                    <Text style={NumberStyles}>Followers</Text>
-                </View>
-                <View style={{
-                    alignItems: 'center'
-                }}>
-                    <Text style={NumberStyles}>{Following}</Text>
-                    <Text style={NumberStyles}>Following</Text>
-                </View>
-                <View style={{
-                    alignItems: 'center'
-                }}>
-                    <Text style={NumberStyles}>{Posts}</Text>
-                    <Text style={NumberStyles}>Posts</Text>
-                </View>
-            </View>
-            {IsFriends && IsFollowing ? <View style={{
-                borderRadius: 5,
-                fontSize: 17,
-                color: '#fe2c55',
-                backgroundColor: '#fe2c55',
-                flexDirection: 'row',
-                padding: 5,
-                width: '50%',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginVertical: 5
-            }}>
-                <Text style={{
-                    fontFamily: 'Poppins-Regular',
-                    color: 'white'
-                }}>Friends</Text>
-            </View> : null}
-            {!IsFriends && IsFollowing ? <View style={{
-                borderRadius: 5,
-                fontSize: 17,
-                backgroundColor: '#2c3e50',
-                flexDirection: 'row',
-                padding: 5,
-                width: '50%',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginVertical: 5
-            }}>
-                <Text style={{
-                    fontFamily: 'Poppins-Regular',
-                    color: 'white'
-                }}>Following</Text>
-            </View> : null}
-        </View>
-    </View>);
+        </View>);
 }

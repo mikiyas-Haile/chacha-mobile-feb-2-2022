@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { View, Text, TouchableOpacity, Pressable, FlatList, Image, StyleSheet, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, TextInput } from 'react-native'
+import { RefreshControl, Platform, Animated as Am, View, Text, TouchableOpacity, Pressable, FlatList, Image, StyleSheet, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, TextInput } from 'react-native'
 import { MainLookup, FetchLookup } from '../../../Lookup'
 import { AppContext } from '../../../../AppContext'
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -14,16 +14,41 @@ import { host } from '../../../Components/host'
 import DateAdded, { SecondaryDateAdded } from '../../../Components/DateAdded'
 import { TranslateApi } from '../../../Components/Translate'
 import Animated, { FadeIn, Layout, ZoomIn, ZoomOut, SlideInUp, SlideOutUp } from 'react-native-reanimated'
-
+import Constants from 'expo-constants';
 
 const { width, height } = Dimensions.get('window')
 
+
+const HEADER_HEIGHT = 44 + Constants.statusBarHeight;
+const BOX_SIZE = Dimensions.get('window').width / 2 - 12;
+
+const wait = (timeout) => {
+    return new Promise((resolve) => {
+        setTimeout(resolve, timeout);
+    });
+};
+
+const scrollAnim = new Am.Value(0);
+const clampedScrollY = scrollAnim.interpolate({
+    inputRange: [HEADER_HEIGHT, HEADER_HEIGHT + 1],
+    outputRange: [0, 1],
+    extrapolateLeft: 'clamp',
+});
+const minusScrollY = Am.multiply(clampedScrollY, -1);
+const translateY = Am.diffClamp(minusScrollY, -HEADER_HEIGHT, 0);
+const scale = scrollAnim.interpolate({
+    inputRange: [0, 2 * HEADER_HEIGHT],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+});
+
 export default function FeedScreen() {
+    // export default function FeedScreen() {
     const ctx = useContext(AppContext);
     const nav = useNavigation();
     const [posts, setPosts] = useState([])
     const [postss, setPostss] = useState([])
-    const [refreshing, setrefreshing] = useState(false)
+    const [refreshing, setRefreshing] = React.useState(false);
     const [nextUrl, setnext] = useState()
     useEffect(() => {
         if (nextUrl) {
@@ -39,28 +64,18 @@ export default function FeedScreen() {
         }
     }, [nextUrl])
     const LoadPostss = () => {
-        setrefreshing(true)
+        setRefreshing(true)
         const cb = (r, c) => {
-            setrefreshing(false)
+            setRefreshing(false)
             if (c === 200) {
                 setPostss(r)
             }
         }
         FetchLookup(cb, { method: 'GET', endpoint: '/api/post/list' })
     }
-    // useEffect(() => {
-    //     const cb = (r, c) => {
-    //         if (c === 200) { setPosts(r) }
-    //     }
-    //     MainLookup(cb, { method: 'GET', endpoint: '/api/post/feed' })
-    // }, [])
     useEffect(() => {
         LoadPostss()
-        return () => {
-            // setPosts([]);
-            // setPostss([]);
-        }
-    }, [])
+    },[])
     const callback = (type, item) => {
         const posts = postss.filter(obj => obj.id !== item.id)
         try {
@@ -90,63 +105,53 @@ export default function FeedScreen() {
     const [offset, setoffset] = useState(0)
     const [showInput, setShowInput] = useState(true)
 
+
+    const scrollRef = React.useRef();
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        wait(2000).then(() => {
+            setRefreshing(false);
+        });
+    }, []);
     return (
-        <View style={{
-            flex: 1,
-            backgroundColor: ctx.bgColor,
-        }}>
-            {showInput && <MakeAQuickPostRenderer setBody={setBody} TranslateApi={TranslateApi} Post={Post} body={body} />}
-
-            <FlatList
-                ListHeaderComponent={() => (
-                    <>
-                        {!showInput && <View style={{ width: '100%', height: 60, backgroundColor: ctx.bgColor }} />}
-                    </>
-
-                )}
-                onScroll={(event) => {
-                    var currentOffset = event.nativeEvent.contentOffset.y;
-                    var direction = currentOffset > offset ? 'down' : 'up';
-                    setoffset(currentOffset);
-                    if (direction === 'down') {
-                        setShowInput(false)
-                    } else {
-                        setShowInput(true)
-                    }
+        <View style={styles.container}>
+            <Am.ScrollView
+            data={postss}
+            renderItem={renderData}
+                ref={scrollRef}
+                contentContainerStyle={styles.gallery}
+                style={{
+                    zIndex: 0,
+                    height: '100%',
+                    elevation: -1,
+                    paddingTop: 50
                 }}
-                ListFooterComponent={() => (
-                    <View style={{
-                        height: height / 2,
-                        width: width,
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <TouchableOpacity onPress={() => nav.push('Home', { screen: 'Create' })} style={{
-                            alignSelf: 'center',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderColor: ctx.textColor,
-                            borderWidth: 1,
-                            borderRadius: 10,
-                            width: width / 3,
-                            height: height / 4,
-                            padding: 10
-                        }}>
-                            <Ionicons name='add-circle-outline' color={ctx.textColor} size={width / 4} />
-                            <Text style={{
-                                fontFamily: ctx.RegularFont,
-                                textAlign: 'center',
-                                fontSize: 13,
-                                color: ctx.textColor,
-                            }} >{ctx.language === 'Amharic' ? 'የወዳጅ ቻቻዎች እዚህ ይታያሉ' : TranslateApi({ str: "Posts from friends will appear here", id: 0 })}</Text>
-                        </TouchableOpacity>
-                    </View>
+                scrollEventThrottle={1}
+                bounces={true}
+                showsVerticalScrollIndicator={false}
+                onScroll={Am.event(
+                    [{ nativeEvent: { contentOffset: { y: scrollAnim } } }],
+                    { useNativeDriver: true }
                 )}
-                onRefresh={LoadPostss} refreshing={refreshing} keyExtractor={(i, k) => k.toString()} data={postss} renderItem={renderData} />
+                overScrollMode="never"
+                contentInset={{ top: HEADER_HEIGHT }}
+                contentOffset={{ y: -HEADER_HEIGHT }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }>
+                {postss.map(item => {
+                    return (
+                        <PostCard callback={callback} item={item} key={item.id} />
+                    )
+                })}
+            </Am.ScrollView>
+            <Am.View style={[styles.header, { transform: [{ translateY }] }]}>
+                <MakeAQuickPostRenderer setBody={setBody} TranslateApi={TranslateApi} Post={Post} body={body} />
+            </Am.View>
         </View>
     )
 }
-
 export function PostCard(props) {
     const { item, callback } = props;
     const [SecondaryItem, setSecondaryItem] = useState()
@@ -229,7 +234,7 @@ export function PostCard(props) {
                 backgroundColor: ctx.bgColor,
                 color: ctx.textColor,
                 position: 'relative',
-                borderBottomWidth: 2,
+                borderBottomWidth: 1,
                 paddingVertical: 10
             }}>
                 <Pressable onPress={() => (ViewProfile(item.author.username))} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 10 }}>
@@ -370,28 +375,26 @@ function MoreModal({ item, showMore, setshowMore, callback }) {
         </Modal>
     )
 }
-
 function MakeAQuickPostRenderer({ setBody, TranslateApi, index, Post, body }) {
     const ctx = useContext(AppContext);
     const nav = useNavigation();
     return (
         <Animated.View exiting={SlideOutUp} entering={SlideInUp} style={{
             flexDirection: 'row',
-            alignSelf: 'center',
             borderBottomWidth: 1,
-            borderColor: '#2c3e50',
+            borderBottomColor: '#2c3e50',
             paddingVertical: 10,
-            position: 'static'
+            alignItems: 'center',
+            justifyContent: 'space-around',
+            backgroundColor: ctx.bgColor
         }}>
             <TextInput maxLength={200} style={{
                 padding: 5,
                 textAlign: 'left',
                 // borderRadius: 30,
-                borderColor: '#2c3e50',
                 fontFamily: ctx.RegularFont,
                 color: ctx.textColor,
                 width: '80%',
-                marginRight: 5
             }} multiline onChangeText={setBody} placeholder={ctx.language === 'Amharic' ? 'ፈጣን ቻቻ ላድርግ' : TranslateApi({ str: "Make a quick Post", id: 2 })} placeholderTextColor={'grey'}>
                 {body.split(/(\s+)/).map((item, index) => {
                     return <Text key={index} style={{
@@ -409,9 +412,60 @@ function MakeAQuickPostRenderer({ setBody, TranslateApi, index, Post, body }) {
             </TouchableOpacity>
         </Animated.View>);
 }
-
+function BottomButton({ scrollRef }) {
+    const upButtonHandler = () => {
+        scrollRef.current && scrollRef.current.scrollTo({ y: -HEADER_HEIGHT });
+    };
+    return (
+        <TouchableOpacity
+            activeOpacity={0.5}
+            onPress={upButtonHandler}
+            style={styles.upButtonStyle}>
+            <AntDesign name="upcircleo" size={48} color="green" />
+        </TouchableOpacity>
+    );
+}
 const styles = StyleSheet.create({
-
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+    gallery: {
+        // flexDirection: 'row',
+        // flexWrap: 'wrap',
+        paddingBottom: 50,
+    },
+    box: {
+        height: BOX_SIZE,
+        width: BOX_SIZE,
+        margin: 4,
+    },
+    header: {
+        // flex: 1,
+        height: HEADER_HEIGHT,
+        // paddingTop: Constants.statusBarHeight,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+    },
+    title: {
+        fontSize: 16,
+    },
+    upButtonStyle: {
+        position: 'absolute',
+        alignItems: 'center',
+        justifyContent: 'center',
+        right: 30,
+        bottom: 70,
+    },
+    scrollTopButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+    },
     wrapper: {
         height: height / 2
     }

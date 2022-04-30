@@ -284,6 +284,9 @@ export default function ChatRoom(props) {
                         renderItem={renderRow}
                         keyExtractor={(i, k) => k.toString()}
                         inverted
+                        style={{
+                            PaddingBottom: 20,
+                        }}
                     />
                 </> :
                 <>
@@ -333,19 +336,17 @@ export default function ChatRoom(props) {
                 alignItems: 'center',
                 borderTopWidth: 1,
                 borderColor: '#2c3e5050',
-                justifyContent: 'center',
+                backgroundColor: ctx.bgColor + '50',
+                justifyContent: 'space-between',
             }}>
                 <TouchableOpacity onPressIn={startRecording} onPressOut={stopRecording} style={{
                     backgroundColor: ctx.scheme === 'light' ? ctx.bgColor : '#2b2b2b',
-                    padding: 6,
                     borderRadius: 100,
-                    marginRight: 2
                 }}>
                     <MaterialIcons name='keyboard-voice' size={27} color={ctx.textColor} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={PickImage} style={{
                     backgroundColor: ctx.scheme === 'light' ? ctx.bgColor : '#2b2b2b',
-                    padding: 6,
                     borderRadius: 100,
                 }}>
                     <EvilIcons name='image' size={35} color={ctx.textColor} />
@@ -360,9 +361,10 @@ export default function ChatRoom(props) {
                         borderColor: '#2c3e5050',
                         fontFamily: 'Poppins-Regular',
                         color: ctx.textColor,
-                        width: '55%',
+                        width: '70%',
                         marginRight: 5,
                         borderWidth: 1,
+                        backgroundColor: ctx.scheme === 'light' ? 'white' : ctx.scheme === 'dark' ? 'black' : ctx.bgColor
                     }} multiline onChangeText={setBody} placeholder='Send Message...' placeholderTextColor={'grey'} >
                     {body.split(/(\s+)/).map((item, index) => {
                         return (
@@ -542,30 +544,30 @@ function RoomMessageCard(props) {
                 </Text>
                 {isMe && <Bubble ctx={ctx} isMe={isMe} />}
                 {isMe ? null :
-                <>
-                <View style={{
-                    position: "absolute",
-                    backgroundColor: isMe ? '#0077ff' : ctx.scheme === 'light' ? 'white' : '#2b2b2b',
-                    width: 20,
-                    height: 25,
-                    bottom: 0,
-                    borderBottomRightRadius: 25,
-                    left: -10
-                }}>
+                    <>
+                        <View style={{
+                            position: "absolute",
+                            backgroundColor: isMe ? '#0077ff' : ctx.scheme === 'light' ? 'white' : '#2b2b2b',
+                            width: 20,
+                            height: 25,
+                            bottom: 0,
+                            borderBottomRightRadius: 25,
+                            left: -10
+                        }}>
 
-                </View>
-                <View style={{
-                    position: "absolute",
-                    backgroundColor: ctx.bgColor,
-                    //backgroundColor:"green",
-                    width: 20,
-                    height: 35,
-                    bottom: -6,
-                    borderBottomRightRadius: 18,
-                    left: -20
-                }}></View>
-                </>
-}
+                        </View>
+                        <View style={{
+                            position: "absolute",
+                            backgroundColor: ctx.bgColor,
+                            //backgroundColor:"green",
+                            width: 20,
+                            height: 35,
+                            bottom: -6,
+                            borderBottomRightRadius: 18,
+                            left: -20
+                        }}></View>
+                    </>
+                }
             </Pressable>
 
         </>

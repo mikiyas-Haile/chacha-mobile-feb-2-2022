@@ -254,34 +254,32 @@ export function RenderUserPfpsList(props) {
     return (
         <>
             <View style={{ position: 'relative' }}>
-                <Swiper
+
+                {ImageList.length > 0 ? <Swiper
                     onTouchEnd={() => {
                         nav.push("View Pictures", { imgs: ImageList })
                     }}
                     dotColor={ctx.bgColor}
                     activeDotColor={ctx.textColor}
                     style={{ height: height / 4 }}>
-                    {ImageList.length > 0 ?
-                        <>
-                            {ImageList.map((item, index) => {
-                                return (
-                                    <ImageBackground key={index} style={{ flex: 1 }} source={{ uri: item.uri }}>
-                                        <LinearGradient
-                                            colors={['#17171700', ctx.bgColor]}
-                                            start={{ x: 0, y: 0 }}
-                                            end={{ x: 0, y: 1 }} style={{
-                                                flex: 1
-                                            }}>
-                                        </LinearGradient>
-                                    </ImageBackground>
+                    {ImageList.map((item, index) => {
+                        return (
+                            <ImageBackground key={index} style={{ flex: 1 }} source={{ uri: item.uri }}>
+                                <LinearGradient
+                                    colors={['#17171700', ctx.bgColor]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 0, y: 1 }} style={{
+                                        flex: 1
+                                    }}>
+                                </LinearGradient>
+                            </ImageBackground>
 
-                                )
-                            })}
-                        </>
-                        :
-                        <View style={{ height: height / 4, width: '100%', backgroundColor: 'grey' }} />
-                    }
+                        )
+                    })}
                 </Swiper>
+                    :
+                    <View style={{ height: height / 4, width: '100%', backgroundColor: 'grey' }} />
+                }
 
                 <TouchableOpacity style={{
                     position: 'absolute',

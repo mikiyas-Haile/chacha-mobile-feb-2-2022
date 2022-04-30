@@ -30,23 +30,22 @@ export default function MainScreen() {
     const notLogged = ctx.token === null
     const [navigationInit, setInnit] = useState('Home')
     const [otherUser, setOtherUser] = useState('')
-    const [notice, setnotice] = useState('')
     useEffect(() => {
         const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-          const url = response.notification.request.content.data;
-          if (url.type) {
-              const type = url.type;
-              console.log(url.type, url.to_user, url.request_user)
-              if (type === 'new_chat') {
-                setOtherUser(url.request_user)
-                setOtherUser("New Chat")
-                setInnit("Room")
-                nav.navigate("Room",{ otherUser: url.request_user })
-              }
-          }
+            const url = response.notification.request.content.data;
+            if (url.type) {
+                const type = url.type;
+                console.log(url.type, url.to_user, url.request_user)
+                if (type === 'new_chat') {
+                    setOtherUser(url.request_user)
+                    setOtherUser("New Chat")
+                    setInnit("Room")
+                    nav.navigate("Room", { otherUser: url.request_user })
+                }
+            }
         });
         return () => subscription.remove();
-      }, []);
+    }, []);
 
     const InitialRouteName = notLogged ? 'Landing' : navigationInit
 
@@ -82,7 +81,12 @@ export default function MainScreen() {
                 <Stack.Screen options={{ headerShown: false }} name='Home' component={HomeScreen} />
                 <Stack.Screen options={{ title: 'Make a post' }} name='Publish Pictures' component={PublishPicture} />
                 <Stack.Screen options={{ title: 'View Pictures' }} name='View My Pictures' component={ViewAllPicturesFromGallery} />
-                <Stack.Screen initialParams={{ otherUser: otherUser }} name='Room' component={ChatRoom} />
+                <Stack.Screen options={{ headerStyle: {
+                        backgroundColor: ctx.bgColor,
+                        borderBottomWidth: 1,
+                        borderBottomColor: ctx.textColor
+                    },
+                }} initialParams={{ otherUser: otherUser }} name='Room' component={ChatRoom} />
                 <Stack.Screen name='Contacts List' component={ContactList} />
                 <Stack.Screen options={{ headerShown: false }} name='My Profile' component={YourProfile} />
                 <Stack.Screen name='Verify Phone Number' component={VerifyPhoneNumber} />
